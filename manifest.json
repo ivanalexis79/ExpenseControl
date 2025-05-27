@@ -1,7 +1,7 @@
 {
     "name": "Mis Gastos",
     "short_name": "Gastos",
-    "start_url": "/index.html",
+    "start_url": "/ExpenseControl/index.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#3b82f6",
