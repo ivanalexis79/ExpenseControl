@@ -7,7 +7,7 @@ const urlsToCache = [
     "/js/db.js",
     "/js/chart.js",
     "/manifest.json",
-    "/assets/icon.png"
+    "/assets/gastos.png"
 ];
 
 // Instalación del Service Worker y almacenamiento en caché
