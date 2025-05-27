@@ -1,13 +1,13 @@
 const CACHE_NAME = "gastos-pwa-cache-v1";
 const urlsToCache = [
-    "/",
-    "/index.html",
-    "/css/styles.css",
-    "/js/app.js",
-    "/js/db.js",
-    "/js/chart.js",
-    "/manifest.json",
-    "/assets/gastos.png"
+    "/ExpenseControl/",
+    "/ExpenseControl/index.html",
+    "/ExpenseControl/css/styles.css",
+    "/ExpenseControl/js/app.js",
+    "/ExpenseControl/js/db.js",
+    "/ExpenseControl/js/chart.js",
+    "/ExpenseControl/manifest.json",
+    "/ExpenseControl/assets/gastos.png"
 ];
 
 // Instalación del Service Worker y almacenamiento en caché
