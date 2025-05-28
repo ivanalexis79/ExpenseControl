@@ -202,3 +202,4 @@ class GastosApp {
             document.getElementById('editarId').value = gasto.id;
             document.getElementById('editarMonto').value
 */
+}
