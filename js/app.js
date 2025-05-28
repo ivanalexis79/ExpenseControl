@@ -20,6 +20,15 @@ dbRequest.onerror = (event) => {
     console.error("Error al abrir la base de datos:", event.target.error);
 };
 
+dbRequest.onupgradeneeded = (event) => {
+    alert();
+    let db = event.target.result;
+    // Verificar si el objeto almacenado 'gastos' ya existe antes de crearlo
+    if (!db.objectStoreNames.contains("gastos")) {
+        db.createObjectStore("gastos", { keyPath: "id", autoIncrement: true });
+    }
+};
+
 function agregarGasto() {
     if (!db) {
         console.error("La base de datos aún no está lista.");
