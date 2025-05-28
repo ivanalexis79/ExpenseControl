@@ -8,8 +8,9 @@
     <link rel="icon" href="assets/gastos.png">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Scripts en el orden correcto: primero DB, luego chart, luego app -->
+    <!-- Scripts en el orden correcto -->
     <script defer src="js/db.js"></script>
+    <script defer src="js/categorias.js"></script>
     <script defer src="js/chart.js"></script>
     <script defer src="js/app.js"></script>
 </head>
@@ -38,7 +39,12 @@
 
             <!-- Formulario para agregar gastos -->
             <section class="form-section">
-                <h2>Agregar Nuevo Gasto</h2>
+                <div class="section-header">
+                    <h2>Agregar Nuevo Gasto</h2>
+                    <button onclick="mostrarGestorCategorias()" class="btn btn-secondary">
+                        🏷️ Gestionar Categorías
+                    </button>
+                </div>
                 <form id="formGasto" onsubmit="agregarGasto(event)">
                     <div class="form-group">
                         <label for="monto">💵 Monto:</label>
@@ -197,6 +203,19 @@
             color: #4a5568;
             margin-bottom: 20px;
             font-size: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            margin-bottom: 0;
         }
 
         .chart-container {
