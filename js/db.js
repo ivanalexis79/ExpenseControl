@@ -1,5 +1,3 @@
-const dbRequest = indexedDB.open("GastosDB", 1);
-
 dbRequest.onupgradeneeded = (event) => {
     let db = event.target.result;
     // Verificar si el objeto almacenado 'gastos' ya existe antes de crearlo
