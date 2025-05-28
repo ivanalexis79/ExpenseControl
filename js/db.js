@@ -8,7 +8,4 @@ dbRequest.onupgradeneeded = (event) => {
     }
 };
 
-dbRequest.onsuccess = (event) => {
-    let db = event.target.result;
-    console.log("Base de datos lista.");
-};
+
