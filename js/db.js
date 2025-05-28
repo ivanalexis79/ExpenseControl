@@ -39,9 +39,12 @@ class GastosDB {
             });
             categoriasStore.createIndex('nombre', 'nombre', { unique: true });
             
-            // Insertar categorías por defecto
-            categoriasStore.transaction.oncomplete = () => {
-                this.insertarCategoriasDefault();
+            // Insertar categorías por defecto después de crear la tabla
+            const transaction = categoriasStore.transaction;
+            transaction.oncomplete = () => {
+                setTimeout(() => {
+                    this.insertarCategoriasDefault();
+                }, 100);
             };
         }
 
@@ -60,7 +63,7 @@ class GastosDB {
     }
 
     // Insertar categorías por defecto
-    async insertarCategoriasDefault() {
+    insertarCategoriasDefault() {
         const categoriasDefault = [
             { nombre: 'Alimentación', color: '#FF6B6B' },
             { nombre: 'Transporte', color: '#4ECDC4' },
@@ -71,9 +74,18 @@ class GastosDB {
             { nombre: 'Otros', color: '#95A5A6' }
         ];
 
-        for (const categoria of categoriasDefault) {
-            await this.insertarCategoria(categoria);
-        }
+        // Insertar cada categoría usando transacciones separadas
+        const transaction = this.db.transaction(['categorias'], 'readwrite');
+        const store = transaction.objectStore('categorias');
+        
+        categoriasDefault.forEach(categoria => {
+            const categoriaData = {
+                nombre: categoria.nombre,
+                color: categoria.color,
+                fecha_creacion: new Date().toISOString()
+            };
+            store.add(categoriaData);
+        });
     }
 
     // === FUNCIONES PARA CATEGORÍAS ===
@@ -356,17 +368,33 @@ async function inicializarApp() {
         await gastosDB.init();
         console.log('Base de datos inicializada correctamente');
         
-        // Ejemplo de uso:
-        // await gastosDB.insertarGasto({
-        //     monto: 25.50,
-        //     descripcion: 'Almuerzo en restaurante',
-        //     categoria_id: 1,
-        //     fecha: '2025-05-27'
-        // });
+        // Ejemplo de uso comentado:
+        /*
+        await gastosDB.insertarGasto({
+            monto: 25.50,
+            descripcion: 'Almuerzo en restaurante',
+            categoria_id: 1,
+            fecha: '2025-05-27'
+        });
+        */
         
     } catch (error) {
         console.error('Error al inicializar la base de datos:', error);
     }
+}
+
+// Función alternativa para inicializar sin async/await en el nivel superior
+function inicializarAppSync() {
+    gastosDB.init()
+        .then(() => {
+            console.log('Base de datos inicializada correctamente');
+            
+            // Aquí puedes agregar código adicional después de la inicialización
+            
+        })
+        .catch(error => {
+            console.error('Error al inicializar la base de datos:', error);
+        });
 }
 
 // Exportar para uso en módulos
@@ -379,22 +407,11 @@ if (typeof window !== 'undefined') {
     window.GastosDB = GastosDB;
     window.gastosDB = gastosDB;
     
-    // Inicializar automáticamente cuando se carga la página
-    document.addEventListener('DOMContentLoaded', inicializarApp);
+    // Inicializar cuando se carga la página
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', inicializarApp);
+    } else {
+        // Si el documento ya está cargado, inicializar inmediatamente
+        inicializarApp();
+    }
 }
-
-
-// La base de datos se inicializa automáticamente
-// Agregar un gasto
-await gastosDB.insertarGasto({
-    monto: 50.00,
-    descripcion: 'Supermercado',
-    categoria_id: 1,
-    fecha: '2025-05-27'
-});
-
-// Obtener todos los gastos
-const gastos = await gastosDB.obtenerGastos();
-
-// Obtener resumen con estadísticas
-const resumen = await gastosDB.obtenerResumenGastos();
