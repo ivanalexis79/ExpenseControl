@@ -185,6 +185,7 @@ class GastosApp {
     }
 
     // Editar gasto
+    /*
     async editarGasto(id) {
         try {
             const gastos = await window.gastosDB.obtenerGastos();
@@ -200,3 +201,4 @@ class GastosApp {
             // Llenar formulario de edición
             document.getElementById('editarId').value = gasto.id;
             document.getElementById('editarMonto').value
+*/
