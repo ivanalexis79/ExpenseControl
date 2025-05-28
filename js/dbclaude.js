@@ -382,3 +382,19 @@ if (typeof window !== 'undefined') {
     // Inicializar automáticamente cuando se carga la página
     document.addEventListener('DOMContentLoaded', inicializarApp);
 }
+
+
+// La base de datos se inicializa automáticamente
+// Agregar un gasto
+await gastosDB.insertarGasto({
+    monto: 50.00,
+    descripcion: 'Supermercado',
+    categoria_id: 1,
+    fecha: '2025-05-27'
+});
+
+// Obtener todos los gastos
+const gastos = await gastosDB.obtenerGastos();
+
+// Obtener resumen con estadísticas
+const resumen = await gastosDB.obtenerResumenGastos();
