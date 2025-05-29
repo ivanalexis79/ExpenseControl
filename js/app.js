@@ -1,16 +1,216 @@
-
+// Registrar Service Worker
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js")
     .then(() => console.log("Service Worker registrado correctamente."))
     .catch((error) => console.error("Error al registrar Service Worker:", error));
 }
 
+// Base de Datos - IndexedDB
+class GastosDB {
+    constructor() {
+        this.db = null;
+        this.version = 1;
+        this.nombreDB = 'GastosPersonalesDB';
+    }
 
-// Aplicación Principal - app.js
+    async inicializar() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.nombreDB, this.version);
 
+            request.onerror = () => {
+                reject(new Error('Error al abrir la base de datos'));
+            };
+
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                resolve();
+            };
+
+            request.onupgradeneeded = (event) => {
+                this.db = event.target.result;
+                this.crearTablas();
+            };
+        });
+    }
+
+    crearTablas() {
+        // Crear tabla de categorías
+        if (!this.db.objectStoreNames.contains('categorias')) {
+            const categoriasStore = this.db.createObjectStore('categorias', { keyPath: 'id', autoIncrement: true });
+            categoriasStore.createIndex('nombre', 'nombre', { unique: false });
+        }
+
+        // Crear tabla de gastos
+        if (!this.db.objectStoreNames.contains('gastos')) {
+            const gastosStore = this.db.createObjectStore('gastos', { keyPath: 'id', autoIncrement: true });
+            gastosStore.createIndex('fecha', 'fecha', { unique: false });
+            gastosStore.createIndex('categoria_id', 'categoria_id', { unique: false });
+        }
+
+        // Insertar categorías predeterminadas
+        this.insertarCategoriasPredeterminadas();
+    }
+
+    insertarCategoriasPredeterminadas() {
+        const categoriasPredeterminadas = [
+            { nombre: 'Alimentación', color: '#FF6B6B' },
+            { nombre: 'Transporte', color: '#4ECDC4' },
+            { nombre: 'Entretenimiento', color: '#45B7D1' },
+            { nombre: 'Salud', color: '#96CEB4' },
+            { nombre: 'Educación', color: '#FFEAA7' },
+            { nombre: 'Ropa', color: '#DDA0DD' },
+            { nombre: 'Hogar', color: '#98D8C8' },
+            { nombre: 'Otros', color: '#F7DC6F' }
+        ];
+
+        const transaction = this.db.transaction(['categorias'], 'readwrite');
+        const store = transaction.objectStore('categorias');
+
+        categoriasPredeterminadas.forEach(categoria => {
+            store.add(categoria);
+        });
+    }
+
+    // Métodos para gastos
+    async insertarGasto(gasto) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            
+            const request = store.add({
+                ...gasto,
+                fecha_creacion: new Date().toISOString()
+            });
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async obtenerGastos() {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readonly');
+            const store = transaction.objectStore('gastos');
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async obtenerGastoPorId(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readonly');
+            const store = transaction.objectStore('gastos');
+            const request = store.get(id);
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async actualizarGasto(id, gastoActualizado) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            
+            // Primero obtener el gasto existente
+            const getRequest = store.get(id);
+            getRequest.onsuccess = () => {
+                const gastoExistente = getRequest.result;
+                if (gastoExistente) {
+                    const gastoCompleto = {
+                        ...gastoExistente,
+                        ...gastoActualizado,
+                        id: id
+                    };
+                    
+                    const putRequest = store.put(gastoCompleto);
+                    putRequest.onsuccess = () => resolve(putRequest.result);
+                    putRequest.onerror = () => reject(putRequest.error);
+                } else {
+                    reject(new Error('Gasto no encontrado'));
+                }
+            };
+            getRequest.onerror = () => reject(getRequest.error);
+        });
+    }
+
+    async eliminarGasto(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            const request = store.delete(id);
+
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async obtenerCategorias() {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['categorias'], 'readonly');
+            const store = transaction.objectStore('categorias');
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async obtenerGastosMesActual() {
+        const ahora = new Date();
+        const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        const finMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0);
+        
+        const gastos = await this.obtenerGastos();
+        return gastos.filter(gasto => {
+            const fechaGasto = new Date(gasto.fecha);
+            return fechaGasto >= inicioMes && fechaGasto <= finMes;
+        });
+    }
+
+    async obtenerResumenGastos() {
+        const gastos = await this.obtenerGastos();
+        const total = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+        return {
+            total: total,
+            totalGastos: gastos.length
+        };
+    }
+}
+
+// Funciones de utilidad
+function mostrarLoading(mostrar) {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = mostrar ? 'block' : 'none';
+    }
+}
+
+function mostrarToast(mensaje, tipo = 'info') {
+    // Crear toast si no existe
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+    }
+    
+    toast.textContent = mensaje;
+    toast.className = `toast ${tipo} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Aplicación Principal
 class GastosApp {
     constructor() {
         this.gastoEditando = null;
+        this.reporteActual = null;
     }
 
     // Inicializar la aplicación
@@ -23,13 +223,38 @@ class GastosApp {
                 fechaInput.value = hoy;
             }
 
+            // Cargar categorías en el select
+            await this.cargarCategorias();
+            
             // Cargar datos iniciales
             await this.cargarResumen();
             await this.cargarGastos();
             
+            // Configurar eventos
+            this.configurarEventos();
+            
             console.log('Aplicación inicializada correctamente');
         } catch (error) {
             console.error('Error al inicializar la aplicación:', error);
+        }
+    }
+
+    // Cargar categorías en el select
+    async cargarCategorias() {
+        try {
+            const categorias = await window.gastosDB.obtenerCategorias();
+            const select = document.getElementById('categoria');
+            if (select) {
+                select.innerHTML = '<option value="">Seleccionar categoría</option>';
+                categorias.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nombre;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error al cargar categorías:', error);
         }
     }
 
@@ -83,6 +308,12 @@ class GastosApp {
         } finally {
             mostrarLoading(false);
         }
+    }
+
+    // Actualizar toda la interfaz
+    async actualizarTodo() {
+        await this.cargarResumen();
+        await this.cargarGastos();
     }
 
     // Cargar lista de gastos
@@ -145,10 +376,10 @@ class GastosApp {
                         </div>
                     </div>
                     <div class="gasto-actions">
-                        <button class="btn btn-small btn-secondary" onclick="editarGasto(${gasto.id})" title="Editar">
+                        <button class="btn btn-small btn-secondary" onclick="window.appGastos.editarGasto(${gasto.id})" title="Editar">
                             ✏️
                         </button>
-                        <button class="btn btn-small btn-danger" onclick="eliminarGasto(${gasto.id})" title="Eliminar">
+                        <button class="btn btn-small btn-danger" onclick="window.appGastos.eliminarGasto(${gasto.id})" title="Eliminar">
                             🗑️
                         </button>
                     </div>
@@ -185,33 +416,35 @@ class GastosApp {
     }
 
     // Editar gasto
-
-// Editar gasto
     async editarGasto(id) {
         try {
             const gasto = await window.gastosDB.obtenerGastoPorId(id);
             if (!gasto) {
-                alert('Gasto no encontrado');
+                mostrarToast('Gasto no encontrado', 'error');
                 return;
             }
             
             // Llenar el formulario con los datos del gasto
             document.getElementById('descripcion').value = gasto.descripcion;
             document.getElementById('monto').value = gasto.monto;
-            document.getElementById('categoria').value = gasto.categoria;
+            document.getElementById('categoria').value = gasto.categoria_id;
             document.getElementById('fecha').value = gasto.fecha;
             
             // Cambiar el botón para modo edición
             const btnAgregar = document.getElementById('btnAgregar');
             btnAgregar.textContent = 'Actualizar Gasto';
-            btnAgregar.onclick = () => this.actualizarGasto(id);
+            btnAgregar.onclick = (e) => {
+                e.preventDefault();
+                this.actualizarGasto(id);
+            };
             
             // Mostrar botón cancelar
             this.mostrarBtnCancelar();
+            this.gastoEditando = id;
             
         } catch (error) {
             console.error('Error al editar gasto:', error);
-            alert('Error al cargar los datos del gasto');
+            mostrarToast('Error al cargar los datos del gasto', 'error');
         }
     }
     
@@ -219,18 +452,20 @@ class GastosApp {
     async actualizarGasto(id) {
         const descripcion = document.getElementById('descripcion').value.trim();
         const monto = parseFloat(document.getElementById('monto').value);
-        const categoria = document.getElementById('categoria').value;
+        const categoria_id = parseInt(document.getElementById('categoria').value);
         const fecha = document.getElementById('fecha').value;
         
-        if (!this.validarFormulario(descripcion, monto, categoria, fecha)) {
+        if (!this.validarFormulario(descripcion, monto, categoria_id, fecha)) {
             return;
         }
         
         try {
+            mostrarLoading(true);
+            
             const gastoActualizado = {
                 descripcion,
                 monto,
-                categoria,
+                categoria_id,
                 fecha
             };
             
@@ -241,14 +476,15 @@ class GastosApp {
             this.resetearBotones();
             
             // Actualizar la vista
-            await this.cargarGastos();
-            await this.cargarResumen();
+            await this.actualizarTodo();
             
-            alert('Gasto actualizado correctamente');
+            mostrarToast('Gasto actualizado correctamente', 'success');
             
         } catch (error) {
             console.error('Error al actualizar gasto:', error);
-            alert('Error al actualizar el gasto');
+            mostrarToast('Error al actualizar el gasto', 'error');
+        } finally {
+            mostrarLoading(false);
         }
     }
     
@@ -259,182 +495,16 @@ class GastosApp {
         }
         
         try {
+            mostrarLoading(true);
             await window.gastosDB.eliminarGasto(id);
-            await this.cargarGastos();
-            await this.cargarResumen();
-            alert('Gasto eliminado correctamente');
+            await this.actualizarTodo();
+            mostrarToast('Gasto eliminado correctamente', 'success');
             
         } catch (error) {
             console.error('Error al eliminar gasto:', error);
-            alert('Error al eliminar el gasto');
-        }
-    }
-    
-    // Filtrar gastos
-    async filtrarGastos() {
-        const filtroCategoria = document.getElementById('filtroCategoria').value;
-        const filtroFecha = document.getElementById('filtroFecha').value;
-        
-        try {
-            let gastos;
-            
-            if (filtroCategoria && filtroFecha) {
-                gastos = await window.gastosDB.filtrarGastos(filtroCategoria, filtroFecha);
-            } else if (filtroCategoria) {
-                gastos = await window.gastosDB.obtenerGastosPorCategoria(filtroCategoria);
-            } else if (filtroFecha) {
-                gastos = await window.gastosDB.obtenerGastosPorFecha(filtroFecha);
-            } else {
-                gastos = await window.gastosDB.obtenerTodosLosGastos();
-            }
-            
-            this.mostrarGastos(gastos);
-            
-        } catch (error) {
-            console.error('Error al filtrar gastos:', error);
-        }
-    }
-    
-    // Limpiar filtros
-    async limpiarFiltros() {
-        document.getElementById('filtroCategoria').value = '';
-        document.getElementById('filtroFecha').value = '';
-        await this.cargarGastos();
-    }
-    
-    // Exportar gastos a CSV
-    async exportarCSV() {
-        try {
-            const gastos = await window.gastosDB.obtenerTodosLosGastos();
-            
-            if (gastos.length === 0) {
-                alert('No hay gastos para exportar');
-                return;
-            }
-            
-            // Crear contenido CSV
-            const headers = ['Fecha', 'Descripción', 'Categoría', 'Monto'];
-            const csvContent = [
-                headers.join(','),
-                ...gastos.map(gasto => [
-                    gasto.fecha,
-                    `"${gasto.descripcion}"`,
-                    gasto.categoria,
-                    gasto.monto
-                ].join(','))
-            ].join('\n');
-            
-            // Crear y descargar archivo
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `gastos_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-            
-        } catch (error) {
-            console.error('Error al exportar CSV:', error);
-            alert('Error al exportar los datos');
-        }
-    }
-    
-    // Generar reporte mensual
-    async generarReporteMensual() {
-        try {
-            const gastos = await window.gastosDB.obtenerGastosMesActual();
-            
-            if (gastos.length === 0) {
-                alert('No hay gastos en el mes actual');
-                return;
-            }
-            
-            // Agrupar por categoría
-            const gastosPorCategoria = {};
-            gastos.forEach(gasto => {
-                if (!gastosPorCategoria[gasto.categoria]) {
-                    gastosPorCategoria[gasto.categoria] = 0;
-                }
-                gastosPorCategoria[gasto.categoria] += gasto.monto;
-            });
-            
-            // Crear reporte
-            const total = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
-            const fechaActual = new Date().toLocaleDateString('es-ES', { 
-                year: 'numeric', 
-                month: 'long' 
-            });
-            
-            let reporte = `REPORTE MENSUAL - ${fechaActual.toUpperCase()}\n`;
-            reporte += `${'='.repeat(50)}\n\n`;
-            reporte += `Total de gastos: ${gastos.length}\n`;
-            reporte += `Monto total: $${total.toFixed(2)}\n\n`;
-            reporte += `GASTOS POR CATEGORÍA:\n`;
-            reporte += `${'-'.repeat(30)}\n`;
-            
-            Object.entries(gastosPorCategoria)
-                .sort((a, b) => b[1] - a[1])
-                .forEach(([categoria, monto]) => {
-                    const porcentaje = ((monto / total) * 100).toFixed(1);
-                    reporte += `${categoria}: $${monto.toFixed(2)} (${porcentaje}%)\n`;
-                });
-            
-            // Mostrar reporte en modal o descargar
-            this.mostrarReporte(reporte);
-            
-        } catch (error) {
-            console.error('Error al generar reporte:', error);
-            alert('Error al generar el reporte');
-        }
-    }
-    
-    // Mostrar reporte en modal
-    mostrarReporte(reporte) {
-        // Crear modal si no existe
-        let modal = document.getElementById('modalReporte');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'modalReporte';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Reporte Mensual</h2>
-                    <pre id="contenidoReporte"></pre>
-                    <div class="modal-buttons">
-                        <button onclick="gestorGastos.descargarReporte()">Descargar</button>
-                        <button onclick="gestorGastos.cerrarModal()">Cerrar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Agregar evento para cerrar
-            modal.querySelector('.close').onclick = () => this.cerrarModal();
-        }
-        
-        // Mostrar reporte
-        document.getElementById('contenidoReporte').textContent = reporte;
-        modal.style.display = 'block';
-        
-        // Guardar reporte para descarga
-        this.reporteActual = reporte;
-    }
-    
-    // Descargar reporte como archivo de texto
-    descargarReporte() {
-        if (!this.reporteActual) return;
-        
-        const blob = new Blob([this.reporteActual], { type: 'text/plain;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `reporte_mensual_${new Date().toISOString().split('T')[0]}.txt`;
-        link.click();
-    }
-    
-    // Cerrar modal
-    cerrarModal() {
-        const modal = document.getElementById('modalReporte');
-        if (modal) {
-            modal.style.display = 'none';
+            mostrarToast('Error al eliminar el gasto', 'error');
+        } finally {
+            mostrarLoading(false);
         }
     }
     
@@ -462,33 +532,35 @@ class GastosApp {
     resetearBotones() {
         const btnAgregar = document.getElementById('btnAgregar');
         btnAgregar.textContent = 'Agregar Gasto';
-        btnAgregar.onclick = () => this.agregarGasto();
+        btnAgregar.onclick = null; // Remover el evento onclick
         
         const btnCancelar = document.getElementById('btnCancelar');
         if (btnCancelar) {
             btnCancelar.style.display = 'none';
         }
+        
+        this.gastoEditando = null;
     }
     
     // Validar formulario
-    validarFormulario(descripcion, monto, categoria, fecha) {
+    validarFormulario(descripcion, monto, categoria_id, fecha) {
         if (!descripcion) {
-            alert('Por favor ingresa una descripción');
+            mostrarToast('Por favor ingresa una descripción', 'error');
             return false;
         }
         
         if (isNaN(monto) || monto <= 0) {
-            alert('Por favor ingresa un monto válido mayor a 0');
+            mostrarToast('Por favor ingresa un monto válido mayor a 0', 'error');
             return false;
         }
         
-        if (!categoria) {
-            alert('Por favor selecciona una categoría');
+        if (!categoria_id) {
+            mostrarToast('Por favor selecciona una categoría', 'error');
             return false;
         }
         
         if (!fecha) {
-            alert('Por favor selecciona una fecha');
+            mostrarToast('Por favor selecciona una fecha', 'error');
             return false;
         }
         
@@ -505,43 +577,18 @@ class GastosApp {
     
     // Configurar eventos
     configurarEventos() {
-        // Filtros
-        const filtroCategoria = document.getElementById('filtroCategoria');
-        const filtroFecha = document.getElementById('filtroFecha');
-        
-        if (filtroCategoria) {
-            filtroCategoria.addEventListener('change', () => this.filtrarGastos());
+        // Formulario principal
+        const form = document.getElementById('formGasto');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                if (this.gastoEditando) {
+                    e.preventDefault();
+                    this.actualizarGasto(this.gastoEditando);
+                } else {
+                    this.agregarGasto(e);
+                }
+            });
         }
-        
-        if (filtroFecha) {
-            filtroFecha.addEventListener('change', () => this.filtrarGastos());
-        }
-        
-        // Botón limpiar filtros
-        const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
-        if (btnLimpiarFiltros) {
-            btnLimpiarFiltros.addEventListener('click', () => this.limpiarFiltros());
-        }
-        
-        // Botón exportar CSV
-        const btnExportarCSV = document.getElementById('btnExportarCSV');
-        if (btnExportarCSV) {
-            btnExportarCSV.addEventListener('click', () => this.exportarCSV());
-        }
-        
-        // Botón generar reporte
-        const btnReporte = document.getElementById('btnReporte');
-        if (btnReporte) {
-            btnReporte.addEventListener('click', () => this.generarReporteMensual());
-        }
-        
-        // Cerrar modal al hacer clic fuera de él
-        window.addEventListener('click', (event) => {
-            const modal = document.getElementById('modalReporte');
-            if (modal && event.target === modal) {
-                this.cerrarModal();
-            }
-        });
         
         // Validación en tiempo real del monto
         const montoInput = document.getElementById('monto');
@@ -555,32 +602,25 @@ class GastosApp {
                 }
             });
         }
-        
-        // Envío del formulario con Enter
-        const form = document.getElementById('formGasto');
-        if (form) {
-            form.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const btnAgregar = document.getElementById('btnAgregar');
-                    btnAgregar.click();
-                }
-            });
-        }
     }
 }
 
 // Inicializar la aplicación cuando se carga la página
 document.addEventListener('DOMContentLoaded', async () => {
-    // Inicializar base de datos
-    await window.gastosDB.inicializar();
-    
-    // Crear instancia del gestor
-    window.gestorGastos = new GestorGastos();
-    
-    // Inicializar la aplicación
-    await window.gestorGastos.inicializar();
-    
-    console.log('Aplicación de gestión de gastos inicializada correctamente');
+    try {
+        // Inicializar base de datos
+        window.gastosDB = new GastosDB();
+        await window.gastosDB.inicializar();
+        
+        // Crear instancia de la aplicación
+        window.appGastos = new GastosApp();
+        
+        // Inicializar la aplicación
+        await window.appGastos.init();
+        
+        console.log('Aplicación de gestión de gastos inicializada correctamente');
+    } catch (error) {
+        console.error('Error al inicializar la aplicación:', error);
+        mostrarToast('Error al inicializar la aplicación', 'error');
+    }
 });
-
