@@ -41,7 +41,7 @@ class GastosDB {
                 autoIncrement: true
             });
             gastosStore.createIndex('fecha', 'fecha', { unique: false });
-            gastosStore.createIndex('categoria', 'categoria', { unique: false });
+            gastosStore.createIndex('categoria_id', 'categoria_id', { unique: false }); // Cambio: usar categoria_id
         }
 
         // Insertar categorías predeterminadas usando la transacción existente
@@ -50,14 +50,14 @@ class GastosDB {
 
     insertarCategoriasPredeterminadas(transaction) {
         const categoriasPredeterminadas = [
-            { nombre: 'Alimentación', icono: '🍽️' },
-            { nombre: 'Transporte', icono: '🚗' },
-            { nombre: 'Entretenimiento', icono: '🎬' },
-            { nombre: 'Salud', icono: '🏥' },
-            { nombre: 'Educación', icono: '📚' },
-            { nombre: 'Servicios', icono: '💡' },
-            { nombre: 'Ropa', icono: '👕' },
-            { nombre: 'Otros', icono: '📦' }
+            { nombre: 'Alimentación', icono: '🍽️', color: '#FF6B6B' },
+            { nombre: 'Transporte', icono: '🚗', color: '#4ECDC4' },
+            { nombre: 'Entretenimiento', icono: '🎬', color: '#45B7D1' },
+            { nombre: 'Salud', icono: '🏥', color: '#96CEB4' },
+            { nombre: 'Educación', icono: '📚', color: '#FFEAA7' },
+            { nombre: 'Servicios', icono: '💡', color: '#DDA0DD' },
+            { nombre: 'Ropa', icono: '👕', color: '#98D8C8' },
+            { nombre: 'Otros', icono: '📦', color: '#F7DC6F' }
         ];
 
         // Usar la transacción que ya está activa
@@ -92,19 +92,29 @@ class GastosDB {
         });
     }
 
-    // Método para agregar gasto
+    // Método para agregar gasto (mantener el nombre original)
     async agregarGasto(gasto) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['gastos'], 'readwrite');
             const store = transaction.objectStore('gastos');
-            const request = store.add({
+            
+            // Mantener la fecha proporcionada o usar la fecha actual si no se proporciona
+            const gastoConFecha = {
                 ...gasto,
-                fecha: new Date().toISOString()
-            });
+                fecha: gasto.fecha || new Date().toISOString().split('T')[0],
+                fechaCreacion: new Date().toISOString()
+            };
+            
+            const request = store.add(gastoConFecha);
             
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
+    }
+
+    // NUEVO: Alias para compatibilidad con app.js
+    async insertarGasto(gasto) {
+        return this.agregarGasto(gasto);
     }
 
     // Método para obtener todos los gastos
@@ -113,6 +123,18 @@ class GastosDB {
             const transaction = this.db.transaction(['gastos'], 'readonly');
             const store = transaction.objectStore('gastos');
             const request = store.getAll();
+            
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // NUEVO: Método para obtener un gasto por ID
+    async obtenerGastoPorId(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readonly');
+            const store = transaction.objectStore('gastos');
+            const request = store.get(id);
             
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
@@ -132,11 +154,12 @@ class GastosDB {
                 categoriasMap[cat.id] = {
                     id: cat.id,
                     nombre: cat.nombre,
-                    icono: cat.icono
+                    icono: cat.icono,
+                    color: cat.color
                 };
             });
             
-            // Agrupar gastos por categoría
+            // Agrupar gastos por categoría - CORRECCIÓN: usar categoria_id
             const gastosPorCategoria = {};
             const coloresCategoria = [
                 '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
@@ -144,16 +167,17 @@ class GastosDB {
             ];
             
             gastos.forEach(gasto => {
-                if (!gastosPorCategoria[gasto.categoria]) {
-                    gastosPorCategoria[gasto.categoria] = {
-                        categoria: categoriasMap[gasto.categoria]?.nombre || 'Sin categoría',
+                const categoriaId = gasto.categoria_id || gasto.categoria; // Compatibilidad con ambos nombres
+                if (!gastosPorCategoria[categoriaId]) {
+                    gastosPorCategoria[categoriaId] = {
+                        categoria: categoriasMap[categoriaId]?.nombre || 'Sin categoría',
                         total: 0,
                         gastos: [],
-                        color: coloresCategoria[Object.keys(gastosPorCategoria).length % coloresCategoria.length]
+                        color: categoriasMap[categoriaId]?.color || coloresCategoria[Object.keys(gastosPorCategoria).length % coloresCategoria.length]
                     };
                 }
-                gastosPorCategoria[gasto.categoria].total += gasto.monto;
-                gastosPorCategoria[gasto.categoria].gastos.push(gasto);
+                gastosPorCategoria[categoriaId].total += gasto.monto;
+                gastosPorCategoria[categoriaId].gastos.push(gasto);
             });
             
             // Convertir a array
@@ -179,7 +203,7 @@ class GastosDB {
             const añoActual = fechaActual.getFullYear();
             
             return gastos.filter(gasto => {
-                const fechaGasto = new Date(gasto.fecha);
+                const fechaGasto = new Date(gasto.fecha + 'T00:00:00'); // Agregar tiempo para evitar problemas de timezone
                 return fechaGasto.getMonth() === mesActual && 
                        fechaGasto.getFullYear() === añoActual;
             });
@@ -201,16 +225,18 @@ class GastosDB {
                 gastosPorCategoria[categoria.id] = {
                     nombre: categoria.nombre,
                     icono: categoria.icono,
+                    color: categoria.color,
                     total: 0,
                     gastos: []
                 };
             });
             
-            // Agrupar gastos por categoría
+            // Agrupar gastos por categoría - CORRECCIÓN: usar categoria_id
             gastos.forEach(gasto => {
-                if (gastosPorCategoria[gasto.categoria]) {
-                    gastosPorCategoria[gasto.categoria].total += gasto.monto;
-                    gastosPorCategoria[gasto.categoria].gastos.push(gasto);
+                const categoriaId = gasto.categoria_id || gasto.categoria; // Compatibilidad
+                if (gastosPorCategoria[categoriaId]) {
+                    gastosPorCategoria[categoriaId].total += gasto.monto;
+                    gastosPorCategoria[categoriaId].gastos.push(gasto);
                 }
             });
             
@@ -232,15 +258,36 @@ class GastosDB {
         });
     }
 
-    // Método para actualizar gasto
-    async actualizarGasto(gasto) {
+    // Método para actualizar gasto - CORRECCIÓN: recibir ID y datos por separado
+    async actualizarGasto(id, gastoActualizado) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['gastos'], 'readwrite');
             const store = transaction.objectStore('gastos');
-            const request = store.put(gasto);
             
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
+            // Primero obtener el gasto existente para mantener ciertos campos
+            const getRequest = store.get(id);
+            
+            getRequest.onsuccess = () => {
+                const gastoExistente = getRequest.result;
+                if (gastoExistente) {
+                    // Combinar datos existentes con actualizaciones
+                    const gastoFinal = {
+                        ...gastoExistente,
+                        ...gastoActualizado,
+                        id: id, // Mantener el ID
+                        fechaModificacion: new Date().toISOString()
+                    };
+                    
+                    const putRequest = store.put(gastoFinal);
+                    
+                    putRequest.onsuccess = () => resolve(putRequest.result);
+                    putRequest.onerror = () => reject(putRequest.error);
+                } else {
+                    reject(new Error('Gasto no encontrado'));
+                }
+            };
+            
+            getRequest.onerror = () => reject(getRequest.error);
         });
     }
 }
