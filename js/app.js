@@ -584,5 +584,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Aplicación de gestión de gastos inicializada correctamente');
 });
 
-
-}
