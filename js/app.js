@@ -139,6 +139,11 @@ class GastosApp {
     async actualizarTodo() {
         await this.cargarResumen();
         await this.cargarGastos();
+        
+        // Actualizar gráfico si existe
+        if (window.actualizarGrafico) {
+            window.actualizarGrafico();
+        }
     }
 
     // Cargar lista de gastos
@@ -429,6 +434,7 @@ class GastosApp {
         }
     }
 }
+
 
 // Inicializar la aplicación cuando se carga la página
 document.addEventListener('DOMContentLoaded', async () => {
