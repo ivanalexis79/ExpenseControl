@@ -1,4 +1,4 @@
-// GastosDB - Sistema de base de datos IndexedDB para control de gastos personales
+// GastosDB - Sistema de base de datos IndexedDB unificado para control de gastos personales
 
 class GastosDB {
     constructor() {
@@ -51,14 +51,15 @@ class GastosDB {
             gastosStore.createIndex('monto', 'monto', { unique: false });
         }
 
+        console.log('Tablas creadas correctamente');
+        
         // Insertar categorías por defecto
         this.insertarCategoriasPredeterminadas();
-        console.log('Tablas creadas correctamente');
     }
 
-    // Insertar categorías por defecto
+    // Insertar categorías predeterminadas
     insertarCategoriasPredeterminadas() {
-        const categoriasDefault = [
+        const categoriasPredeterminadas = [
             { nombre: 'Alimentación', color: '#FF6B6B' },
             { nombre: 'Transporte', color: '#4ECDC4' },
             { nombre: 'Entretenimiento', color: '#45B7D1' },
@@ -66,13 +67,13 @@ class GastosDB {
             { nombre: 'Educación', color: '#FFEAA7' },
             { nombre: 'Ropa', color: '#DDA0DD' },
             { nombre: 'Hogar', color: '#98D8C8' },
-            { nombre: 'Otros', color: '#F7DC6F' }
+            { nombre: 'Otros Gastos', color: '#95A5A6' }
         ];
 
         const transaction = this.db.transaction(['categorias'], 'readwrite');
         const store = transaction.objectStore('categorias');
-        
-        categoriasDefault.forEach(categoria => {
+
+        categoriasPredeterminadas.forEach(categoria => {
             const categoriaData = {
                 nombre: categoria.nombre,
                 color: categoria.color,
@@ -82,24 +83,7 @@ class GastosDB {
         });
     }
 
-    // === FUNCIONES PARA CATEGORÍAS ===
-
-    // Obtener todas las categorías
-    async obtenerCategorias() {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['categorias'], 'readonly');
-            const store = transaction.objectStore('categorias');
-            const request = store.getAll();
-
-            request.onsuccess = () => {
-                resolve(request.result);
-            };
-
-            request.onerror = () => {
-                reject(new Error('Error al obtener categorías'));
-            };
-        });
-    }
+    // === MÉTODOS PARA CATEGORÍAS ===
 
     // Insertar categoría
     async insertarCategoria(categoria) {
@@ -125,7 +109,69 @@ class GastosDB {
         });
     }
 
-    // === FUNCIONES PARA GASTOS ===
+    // Obtener todas las categorías
+    async obtenerCategorias() {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['categorias'], 'readonly');
+            const store = transaction.objectStore('categorias');
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+
+            request.onerror = () => {
+                reject(new Error('Error al obtener categorías'));
+            };
+        });
+    }
+
+    // Editar categoría
+    async editarCategoria(id, datosActualizados) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['categorias'], 'readwrite');
+            const store = transaction.objectStore('categorias');
+            
+            const getRequest = store.get(id);
+            
+            getRequest.onsuccess = () => {
+                const categoria = getRequest.result;
+                if (categoria) {
+                    Object.assign(categoria, datosActualizados);
+                    categoria.fecha_modificacion = new Date().toISOString();
+                    
+                    const updateRequest = store.put(categoria);
+                    updateRequest.onsuccess = () => resolve(updateRequest.result);
+                    updateRequest.onerror = () => reject(new Error('Error al actualizar categoría'));
+                } else {
+                    reject(new Error('Categoría no encontrada'));
+                }
+            };
+
+            getRequest.onerror = () => {
+                reject(new Error('Error al buscar categoría'));
+            };
+        });
+    }
+
+    // Eliminar categoría
+    async eliminarCategoria(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['categorias'], 'readwrite');
+            const store = transaction.objectStore('categorias');
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                resolve(true);
+            };
+
+            request.onerror = () => {
+                reject(new Error('Error al eliminar categoría'));
+            };
+        });
+    }
+
+    // === MÉTODOS PARA GASTOS ===
 
     // Insertar gasto
     async insertarGasto(gasto) {
@@ -182,54 +228,25 @@ class GastosDB {
             };
 
             request.onerror = () => {
-                reject(new Error('Error al obtener gasto'));
+                reject(new Error('Error al obtener el gasto'));
             };
         });
     }
 
-    // Actualizar gasto
-    async actualizarGasto(id, gastoActualizado) {
+    // Obtener gastos por categoría
+    async obtenerGastosPorCategoria(categoriaId) {
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const transaction = this.db.transaction(['gastos'], 'readonly');
             const store = transaction.objectStore('gastos');
-            
-            const getRequest = store.get(id);
-            getRequest.onsuccess = () => {
-                const gastoExistente = getRequest.result;
-                if (gastoExistente) {
-                    const gastoCompleto = {
-                        ...gastoExistente,
-                        ...gastoActualizado,
-                        id: id,
-                        monto: parseFloat(gastoActualizado.monto),
-                        categoria_id: parseInt(gastoActualizado.categoria_id),
-                        fecha_modificacion: new Date().toISOString()
-                    };
-                    
-                    const putRequest = store.put(gastoCompleto);
-                    putRequest.onsuccess = () => resolve(putRequest.result);
-                    putRequest.onerror = () => reject(putRequest.error);
-                } else {
-                    reject(new Error('Gasto no encontrado'));
-                }
-            };
-            getRequest.onerror = () => reject(getRequest.error);
-        });
-    }
-
-    // Eliminar gasto
-    async eliminarGasto(id) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['gastos'], 'readwrite');
-            const store = transaction.objectStore('gastos');
-            const request = store.delete(id);
+            const index = store.index('categoria_id');
+            const request = index.getAll(categoriaId);
 
             request.onsuccess = () => {
-                resolve(true);
+                resolve(request.result);
             };
 
             request.onerror = () => {
-                reject(new Error('Error al eliminar gasto'));
+                reject(new Error('Error al obtener gastos por categoría'));
             };
         });
     }
@@ -253,7 +270,66 @@ class GastosDB {
         });
     }
 
-    // === FUNCIONES DE UTILIDAD ===
+    // Actualizar/Editar gasto (compatible con ambos nombres)
+    async actualizarGasto(id, gastoActualizado) {
+        return this.editarGasto(id, gastoActualizado);
+    }
+
+    async editarGasto(id, datosActualizados) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            
+            const getRequest = store.get(id);
+            
+            getRequest.onsuccess = () => {
+                const gasto = getRequest.result;
+                if (gasto) {
+                    // Actualizar campos
+                    Object.assign(gasto, datosActualizados);
+                    
+                    // Asegurar tipos correctos
+                    if (datosActualizados.monto !== undefined) {
+                        gasto.monto = parseFloat(datosActualizados.monto);
+                    }
+                    if (datosActualizados.categoria_id !== undefined) {
+                        gasto.categoria_id = parseInt(datosActualizados.categoria_id);
+                    }
+                    
+                    gasto.fecha_modificacion = new Date().toISOString();
+                    
+                    const updateRequest = store.put(gasto);
+                    updateRequest.onsuccess = () => resolve(updateRequest.result);
+                    updateRequest.onerror = () => reject(new Error('Error al actualizar gasto'));
+                } else {
+                    reject(new Error('Gasto no encontrado'));
+                }
+            };
+
+            getRequest.onerror = () => {
+                reject(new Error('Error al buscar gasto'));
+            };
+        });
+    }
+
+    // Eliminar gasto
+    async eliminarGasto(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                resolve(true);
+            };
+
+            request.onerror = () => {
+                reject(new Error('Error al eliminar gasto'));
+            };
+        });
+    }
+
+    // === MÉTODOS DE UTILIDAD ===
 
     // Obtener gastos del mes actual
     async obtenerGastosMesActual() {
@@ -261,15 +337,25 @@ class GastosDB {
         const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
         const finMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0);
         
-        const gastos = await this.obtenerGastos();
-        return gastos.filter(gasto => {
-            const fechaGasto = new Date(gasto.fecha);
-            return fechaGasto >= inicioMes && fechaGasto <= finMes;
-        });
+        return await this.obtenerGastosPorFecha(
+            inicioMes.toISOString().split('T')[0],
+            finMes.toISOString().split('T')[0]
+        );
     }
 
     // Obtener resumen de gastos
     async obtenerResumenGastos() {
+        const gastos = await this.obtenerGastos();
+        const total = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+        
+        return {
+            total: total,
+            totalGastos: gastos.length
+        };
+    }
+
+    // Obtener resumen detallado con categorías
+    async obtenerResumenDetallado() {
         const gastos = await this.obtenerGastos();
         const categorias = await this.obtenerCategorias();
         
