@@ -118,7 +118,100 @@ class GastosDB {
             request.onerror = () => reject(request.error);
         });
     }
+
+    // Método para obtener resumen de gastos
+    async obtenerResumenGastos() {
+        try {
+            const gastos = await this.obtenerGastos();
+            const total = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+            
+            return {
+                total: total,
+                totalGastos: gastos.length,
+                gastos: gastos
+            };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Método para obtener gastos del mes actual
+    async obtenerGastosMesActual() {
+        try {
+            const gastos = await this.obtenerGastos();
+            const fechaActual = new Date();
+            const mesActual = fechaActual.getMonth();
+            const añoActual = fechaActual.getFullYear();
+            
+            return gastos.filter(gasto => {
+                const fechaGasto = new Date(gasto.fecha);
+                return fechaGasto.getMonth() === mesActual && 
+                       fechaGasto.getFullYear() === añoActual;
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Método para obtener gastos por categoría
+    async obtenerGastosPorCategoria() {
+        try {
+            const gastos = await this.obtenerGastos();
+            const categorias = await this.obtenerCategorias();
+            
+            const gastosPorCategoria = {};
+            
+            // Inicializar con todas las categorías
+            categorias.forEach(categoria => {
+                gastosPorCategoria[categoria.id] = {
+                    nombre: categoria.nombre,
+                    icono: categoria.icono,
+                    total: 0,
+                    gastos: []
+                };
+            });
+            
+            // Agrupar gastos por categoría
+            gastos.forEach(gasto => {
+                if (gastosPorCategoria[gasto.categoria]) {
+                    gastosPorCategoria[gasto.categoria].total += gasto.monto;
+                    gastosPorCategoria[gasto.categoria].gastos.push(gasto);
+                }
+            });
+            
+            return gastosPorCategoria;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Método para eliminar gasto
+    async eliminarGasto(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            const request = store.delete(id);
+            
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // Método para actualizar gasto
+    async actualizarGasto(gasto) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['gastos'], 'readwrite');
+            const store = transaction.objectStore('gastos');
+            const request = store.put(gasto);
+            
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
 }
 
 // Instancia global
 const gastosDB = new GastosDB();
+
+// Hacer disponible globalmente
+window.gastosDB = gastosDB;
