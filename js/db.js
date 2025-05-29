@@ -123,12 +123,47 @@ class GastosDB {
     async obtenerResumenGastos() {
         try {
             const gastos = await this.obtenerGastos();
+            const categorias = await this.obtenerCategorias();
             const total = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+            
+            // Crear mapa de categorías para acceso rápido
+            const categoriasMap = {};
+            categorias.forEach(cat => {
+                categoriasMap[cat.id] = {
+                    id: cat.id,
+                    nombre: cat.nombre,
+                    icono: cat.icono
+                };
+            });
+            
+            // Agrupar gastos por categoría
+            const gastosPorCategoria = {};
+            const coloresCategoria = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ];
+            
+            gastos.forEach(gasto => {
+                if (!gastosPorCategoria[gasto.categoria]) {
+                    gastosPorCategoria[gasto.categoria] = {
+                        categoria: categoriasMap[gasto.categoria]?.nombre || 'Sin categoría',
+                        total: 0,
+                        gastos: [],
+                        color: coloresCategoria[Object.keys(gastosPorCategoria).length % coloresCategoria.length]
+                    };
+                }
+                gastosPorCategoria[gasto.categoria].total += gasto.monto;
+                gastosPorCategoria[gasto.categoria].gastos.push(gasto);
+            });
+            
+            // Convertir a array
+            const porCategoria = Object.values(gastosPorCategoria);
             
             return {
                 total: total,
                 totalGastos: gastos.length,
-                gastos: gastos
+                gastos: gastos,
+                porCategoria: porCategoria
             };
         } catch (error) {
             throw error;
