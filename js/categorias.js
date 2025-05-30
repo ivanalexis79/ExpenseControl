@@ -344,7 +344,7 @@ class CategoriasManager {
                 return;
             }
 
-            await window.gastosDB.insertarCategoria({ nombre, color });
+            await window.gastosDB.agregarCategoria({ nombre, color });
             
             // Limpiar formulario
             document.getElementById('formNuevaCategoria').reset();
