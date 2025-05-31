@@ -1,0 +1,26 @@
+/*Ocultar barras de desplazamiento*/
+html, body {
+  overflow: hidden; /* Oculta la barra de scroll */
+}
+html, body {
+  overflow: scroll;
+  -ms-overflow-style: none; /* IE y Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}
+body {
+  min-height: 100vh;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+}
+/*No seleccionar texto*/
+* {
+  user-select: none;
+}
+/*No doble toque zoom*/
+html {
+  touch-action: manipulation;
+}
