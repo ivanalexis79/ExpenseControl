@@ -1,13 +1,30 @@
 {
-    "name": "Mis Gastos",
-    "short_name": "Gastos",
-    "start_url": "/ExpenseControl/index.html",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#3b82f6",
-    "icons": [{
-        "src": "assets/gastos.png",
-        "sizes": "512x512",
-        "type": "image/png"
-    }]
+   "name": "Mis Gastos",
+   "short_name": "Gastos",
+   "start_url": "/ExpenseControl/index.html",
+   "display": "standalone",
+   "orientation": "portrait",
+   "background_color": "#ffffff",
+   "theme_color": "#3b82f6",
+   "scope": "/ExpenseControl/",
+   "display_override": ["window-controls-overlay", "standalone"],
+   "lang": "es",
+   "dir": "ltr",
+   "categories": ["finance", "productivity"],
+   "description": "Aplicación para control de gastos personales",
+   "icons": [{
+       "src": "assets/gastos.png",
+       "sizes": "512x512",
+       "type": "image/png",
+       "purpose": "any maskable"
+   }],
+   "screenshots": [],
+   "related_applications": [],
+   "prefer_related_applications": false,
+   "edge_side_panel": {
+       "preferred_width": 400
+   },
+   "launch_handler": {
+       "client_mode": "navigate-existing"
+   }
 }
