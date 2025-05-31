@@ -1,6 +1,7 @@
 // ========== SISTEMA DE ACTUALIZACIÓN PWA ==========
 let newServiceWorker;
 let refreshing = false;
+let updateNotificationShown = false;
 
 // Registrar Service Worker y detectar actualizaciones
 if ('serviceWorker' in navigator) {
@@ -19,12 +20,16 @@ if ('serviceWorker' in navigator) {
                 newServiceWorker = registration.installing;
                 
                 newServiceWorker.addEventListener('statechange', () => {
+                    console.log('[PWA] Estado del SW:', newServiceWorker.state);
                     if (newServiceWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
+                        if (navigator.serviceWorker.controller && !updateNotificationShown) {
                             // Hay una nueva versión disponible
                             console.log('[PWA] Nueva versión lista para instalar');
-                            mostrarNotificacionActualizacion();
-                        } else {
+                            updateNotificationShown = true;
+                            setTimeout(() => {
+                                mostrarNotificacionActualizacion();
+                            }, 1000); // Esperar 1 segundo antes de mostrar
+                        } else if (!navigator.serviceWorker.controller) {
                             // Primera instalación
                             console.log('[PWA] PWA instalada por primera vez');
                         }
@@ -49,8 +54,11 @@ if ('serviceWorker' in navigator) {
 function mostrarNotificacionActualizacion() {
     // Verificar si ya existe una notificación
     if (document.getElementById('update-notification')) {
+        console.log('[PWA] Notificación ya existe, no creando otra');
         return;
     }
+    
+    console.log('[PWA] Creando notificación de actualización');
     
     // Crear notificación de actualización
     const notification = document.createElement('div');
@@ -67,7 +75,7 @@ function mostrarNotificacionActualizacion() {
             text-align: center;
             z-index: 10000;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            animation: slideDown 0.3s ease-out;
+            animation: slideDown 0.5s ease-out;
         ">
             <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
                 <span style="font-weight: 500;">🔄 Nueva versión disponible</span>
@@ -96,22 +104,18 @@ function mostrarNotificacionActualizacion() {
                 </button>
             </div>
         </div>
-        <style>
-            @keyframes slideDown {
-                from { transform: translateY(-100%); }
-                to { transform: translateY(0); }
-            }
-        </style>
     `;
     
     document.body.appendChild(notification);
+    console.log('[PWA] Notificación mostrada');
     
-    // Auto-cerrar después de 10 segundos si no se hace clic
+    // Auto-cerrar después de 30 segundos (aumentado el tiempo)
     setTimeout(() => {
         if (document.getElementById('update-notification')) {
+            console.log('[PWA] Auto-cerrando notificación por timeout');
             cerrarNotificacion();
         }
-    }, 10000);
+    }, 30000);
 }
 
 // Función para actualizar la aplicación
@@ -125,9 +129,14 @@ function actualizarAplicacion() {
 function cerrarNotificacion() {
     const notification = document.getElementById('update-notification');
     if (notification) {
+        console.log('[PWA] Cerrando notificación');
         notification.style.animation = 'slideUp 0.3s ease-in';
         setTimeout(() => {
-            notification.remove();
+            if (notification && notification.parentNode) {
+                notification.remove();
+                updateNotificationShown = false; // Resetear flag
+                console.log('[PWA] Notificación cerrada');
+            }
         }, 300);
     }
 }
@@ -160,9 +169,13 @@ function obtenerVersionActual() {
 // CSS adicional para las animaciones
 const style = document.createElement('style');
 style.textContent = `
+    @keyframes slideDown {
+        from { transform: translateY(-100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
     @keyframes slideUp {
-        from { transform: translateY(0); }
-        to { transform: translateY(-100%); }
+        from { transform: translateY(0); opacity: 1; }
+        to { transform: translateY(-100%); opacity: 0; }
     }
 `;
 document.head.appendChild(style);
