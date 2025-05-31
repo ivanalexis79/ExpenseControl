@@ -16,6 +16,8 @@ body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -webkit-text-size-adjust: 100%; /* Importante para Android */
+  overscroll-behavior: none; /* Importante para pull-to-refresh */
+  overscroll-behavior-y: none; /* Específico para vertical */
 }
 
 /*No seleccionar texto*/
@@ -29,4 +31,6 @@ html {
   -webkit-text-size-adjust: none;
   -moz-text-size-adjust: none;
   -ms-text-size-adjust: none;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none; 
 }
