@@ -1,9 +1,7 @@
 /*Ocultar barras de desplazamiento*/
 html, body {
-  overflow: hidden; /* Oculta la barra de scroll */
-}
-html, body {
-  overflow: scroll;
+  overflow-x: hidden; /* Cambiado de overflow: hidden */
+  overflow-y: auto;   /* Permite scroll vertical */
   -ms-overflow-style: none; /* IE y Edge */
   scrollbar-width: none; /* Firefox */
 }
@@ -11,17 +9,24 @@ html, body {
 html::-webkit-scrollbar {
   display: none; /* Chrome, Safari y Opera */
 }
+
 body {
   min-height: 100vh;
   touch-action: pan-x pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
+  -webkit-text-size-adjust: 100%; /* Importante para Android */
 }
+
 /*No seleccionar texto*/
 * {
   user-select: none;
+  touch-action: manipulation; /* Mueve esto aquí */
 }
-/*No doble toque zoom*/
+
+/* Específico para prevenir zoom */
 html {
-  touch-action: manipulation;
+  -webkit-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -ms-text-size-adjust: none;
 }
