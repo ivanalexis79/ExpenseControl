@@ -11,6 +11,13 @@ window.addEventListener("beforeunload", (event) => {
 });
 
 //evita pinch-to-zoom
+
 document.addEventListener("gesturestart", (event) => {
   event.preventDefault();
 });
+
+document.addEventListener("touchmove", (event) => {
+  if (event.scale !== 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
