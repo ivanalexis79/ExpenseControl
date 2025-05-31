@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
             // Verificar actualizaciones cada 30 segundos (puedes ajustar el tiempo)
             setInterval(() => {
                 registration.update();
-            }, 30000);
+            }, 10000);
             
             // Escuchar por actualizaciones
             registration.addEventListener('updatefound', () => {
