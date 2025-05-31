@@ -7,8 +7,8 @@ const urlsToCache = [
     "/ExpenseControl/js/db.js",
     "/ExpenseControl/js/chart.js",
     "/ExpenseControl/js/update_detector.js",
-    "/ExpenseControl/pwa.css",
-    "/ExpenseControl/pwa.js",
+    "/ExpenseControl/css/pwa.css",
+    "/ExpenseControl/js/pwa.js",
     "/ExpenseControl/manifest.json",
     "/ExpenseControl/assets/gastos.png"
 ];
