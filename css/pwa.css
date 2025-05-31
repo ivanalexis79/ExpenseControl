@@ -13,6 +13,7 @@ html::-webkit-scrollbar {
 }
 body {
   min-height: 100vh;
+  touch-action: pan-x pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
 }
