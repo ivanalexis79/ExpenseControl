@@ -35,6 +35,13 @@
             <!-- Sección del gráfico -->
             <section class="chart-section">
                 <h2>Gastos por Categoría</h2>
+
+<div class="header-controls">
+    <button onclick="verificarActualizaciones()" class="btn btn-update" title="Buscar actualizaciones">
+        🔄 Actualizar App
+    </button>
+</div>
+
                 <div class="chart-container">
                     <canvas id="graficoGastos"></canvas>
                 </div>
@@ -476,6 +483,27 @@
                 justify-content: flex-end;
             }
         }
+
+.header-controls {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.btn-update {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(10px);
+    font-size: 14px;
+    padding: 8px 16px;
+}
+
+.btn-update:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+}
+
     </style>
 </head>
 </body>
