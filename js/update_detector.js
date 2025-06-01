@@ -9,10 +9,10 @@ if ('serviceWorker' in navigator) {
         .then((registration) => {
             console.log('[PWA] Service Worker registrado:', registration);
             
-            // Verificar actualizaciones cada 30 segundos (puedes ajustar el tiempo)
+            // Verificar actualizaciones cada 5 segundos (puedes ajustar el tiempo)
             setInterval(() => {
                 registration.update();
-            }, 10000);
+            }, 5000);
             
             // Escuchar por actualizaciones
             registration.addEventListener('updatefound', () => {
@@ -28,7 +28,7 @@ if ('serviceWorker' in navigator) {
                             updateNotificationShown = true;
                             setTimeout(() => {
                                 mostrarNotificacionActualizacion();
-                            }, 1000); // Esperar 1 segundo antes de mostrar
+                            }, 5000); // Esperar 5 segundo antes de mostrar
                         } else if (!navigator.serviceWorker.controller) {
                             // Primera instalación
                             console.log('[PWA] PWA instalada por primera vez');
