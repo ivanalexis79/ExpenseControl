@@ -120,11 +120,24 @@ function mostrarNotificacionActualizacion() {
 
 // Función para actualizar la aplicación
 function actualizarAplicacion() {
+    console.log('[PWA] Iniciando actualización...');
     if (newServiceWorker) {
+        console.log('[PWA] Enviando skipWaiting al nuevo SW');
         newServiceWorker.postMessage({ action: 'skipWaiting' });
+        
+        // Cerrar notificación inmediatamente
+        cerrarNotificacion();
+        
+        // Fallback: si no responde en 3 segundos, recargar manualmente
+        setTimeout(() => {
+            console.log('[PWA] Fallback: recargando manualmente');
+            window.location.reload();
+        }, 3000);
+    } else {
+        console.log('[PWA] No hay nuevo SW, recargando directamente');
+        window.location.reload();
     }
 }
-
 // Función para cerrar la notificación
 function cerrarNotificacion() {
     const notification = document.getElementById('update-notification');
