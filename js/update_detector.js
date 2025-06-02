@@ -156,9 +156,67 @@ function cerrarNotificacion() {
 
 // Función para verificar manualmente actualizaciones (opcional)
 function verificarActualizaciones() {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ action: 'checkUpdate' });
+    console.log('[PWA] Verificación manual iniciada');
+    
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration('/ExpenseControl/service-worker.js')
+            .then((registration) => {
+                if (registration) {
+                    console.log('[PWA] Forzando verificación de actualización');
+                    return registration.update();
+                }
+            })
+            .then(() => {
+                console.log('[PWA] Verificación completada, esperando resultado...');
+                
+                // Esperar un momento para que se procese la actualización
+                setTimeout(() => {
+                    if (newServiceWorker && newServiceWorker.state === 'installed') {
+                        console.log('[PWA] Nueva versión encontrada, mostrando notificación');
+                        // Resetear el flag para permitir mostrar la notificación manualmente
+                        updateNotificationShown = false;
+                        mostrarNotificacionActualizacion();
+                    } else {
+                        console.log('[PWA] No se encontraron actualizaciones');
+                        mostrarMensajeNoActualizacion();
+                    }
+                }, 2000);
+            })
+            .catch((error) => {
+                console.error('[PWA] Error en verificación:', error);
+                mostrarMensajeNoActualizacion();
+            });
+    } else {
+        console.log('[PWA] Service Worker no disponible');
     }
+}
+
+function mostrarMensajeNoActualizacion() {
+    const mensaje = document.createElement('div');
+    mensaje.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        ">
+            ✅ La aplicación ya está actualizada
+        </div>
+    `;
+    
+    document.body.appendChild(mensaje);
+    
+    setTimeout(() => {
+        if (mensaje && mensaje.parentNode) {
+            mensaje.remove();
+        }
+    }, 3000);
 }
 
 // Función para obtener la versión actual (opcional)
