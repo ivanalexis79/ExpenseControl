@@ -193,7 +193,7 @@ function verificarActualizaciones() {
 
 function mostrarMensajeNoActualizacion() {
     const mensaje = document.createElement('div');
-    mensaje.innerHTML = '
+    mensaje.innerHTML = `
         <div style="
             position: fixed;
             top: 20px;
@@ -208,7 +208,7 @@ function mostrarMensajeNoActualizacion() {
         ">
             ✅ La aplicación ya está actualizada
         </div>
-    ';
+    `;
     
     document.body.appendChild(mensaje);
     
