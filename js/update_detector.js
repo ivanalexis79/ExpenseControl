@@ -181,3 +181,9 @@ style.textContent = `
 document.head.appendChild(style);
 
 console.log('[PWA] Sistema de actualización inicializado');
+
+// Función temporal para probar la notificación
+window.testNotificacion = function() {
+    console.log('[PWA] Forzando notificación de prueba');
+    mostrarNotificacionActualizacion();
+};
