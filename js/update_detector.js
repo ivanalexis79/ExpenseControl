@@ -9,10 +9,10 @@ if ('serviceWorker' in navigator) {
         .then((registration) => {
             console.log('[PWA] Service Worker registrado:', registration);
             
-            // Verificar actualizaciones cada 5 segundos (puedes ajustar el tiempo)
+            // Verificar actualizaciones cada 30 segundos (puedes ajustar el tiempo)
             setInterval(() => {
                 registration.update();
-            }, 5000);
+            }, 30000);
             
             // Escuchar por actualizaciones
             registration.addEventListener('updatefound', () => {
