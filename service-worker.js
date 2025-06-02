@@ -78,14 +78,26 @@ self.addEventListener("fetch", (event) => {
 });
 
 // Manejar mensajes desde la aplicación principal
+
 self.addEventListener('message', (event) => {
+    console.log('[SW] Mensaje recibido:', event.data);
+    
     if (event.data && event.data.action === 'skipWaiting') {
-        console.log('[SW] Forzando actualización');
+        console.log('[SW] Ejecutando skipWaiting inmediatamente');
         self.skipWaiting();
+        return;
     }
     
     if (event.data && event.data.action === 'getVersion') {
         event.ports[0].postMessage({ version: CACHE_NAME });
+        return;
+    }
+    
+    if (event.data && event.data.action === 'checkUpdate') {
+        self.registration.update().then(() => {
+            console.log('[SW] Verificación de actualización completada');
+        });
+        return;
     }
 });
 
