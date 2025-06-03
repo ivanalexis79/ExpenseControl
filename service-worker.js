@@ -3,6 +3,8 @@ const urlsToCache = [
     "/ExpenseControl/",
     "/ExpenseControl/index.html",
     "/ExpenseControl/css/styles.css",
+    "/ExpenseControl/mdl/material.min.css",
+    "/ExpenseControl/mdl/material.min.js",    
     "/ExpenseControl/js/app.js",
     "/ExpenseControl/js/db.js",
     "/ExpenseControl/js/chart.js",
