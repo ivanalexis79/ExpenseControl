@@ -2,40 +2,25 @@
 let newServiceWorker;
 let refreshing = false;
 let updateNotificationShown = false;
+let registration = null; // Guardar referencia del registration
 
 // Registrar Service Worker y detectar actualizaciones
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/ExpenseControl/service-worker.js')
-        .then((registration) => {
-            console.log('[PWA] Service Worker registrado:', registration);
+        .then((reg) => {
+            console.log('[PWA] Service Worker registrado:', reg);
+            registration = reg; // Guardar referencia
             
-            // Verificar actualizaciones cada 30 segundos (puedes ajustar el tiempo)
+            // Verificar actualizaciones cada 30 segundos
             setInterval(() => {
-                registration.update();
+                if (registration) {
+                    console.log('[PWA] Verificación automática de actualización');
+                    registration.update();
+                }
             }, 30000);
             
-            // Escuchar por actualizaciones
-            registration.addEventListener('updatefound', () => {
-                console.log('[PWA] Nueva versión detectada');
-                newServiceWorker = registration.installing;
-                
-                newServiceWorker.addEventListener('statechange', () => {
-                    console.log('[PWA] Estado del SW:', newServiceWorker.state);
-                    if (newServiceWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller && !updateNotificationShown) {
-                            // Hay una nueva versión disponible
-                            console.log('[PWA] Nueva versión lista para instalar');
-                            updateNotificationShown = true;
-                            setTimeout(() => {
-                                mostrarNotificacionActualizacion();
-                            }, 5000); // Esperar 5 segundo antes de mostrar
-                        } else if (!navigator.serviceWorker.controller) {
-                            // Primera instalación
-                            console.log('[PWA] PWA instalada por primera vez');
-                        }
-                    }
-                });
-            });
+            // Configurar listeners de actualización
+            setupUpdateListeners(reg);
         })
         .catch((error) => {
             console.error('[PWA] Error al registrar Service Worker:', error);
@@ -47,6 +32,64 @@ if ('serviceWorker' in navigator) {
         refreshing = true;
         console.log('[PWA] Recargando por nueva versión');
         window.location.reload();
+    });
+}
+
+// Función para configurar los listeners de actualización
+function setupUpdateListeners(reg) {
+    // Verificar si ya hay un SW esperando
+    if (reg.waiting) {
+        console.log('[PWA] SW ya esperando al registrar');
+        newServiceWorker = reg.waiting;
+        setupServiceWorkerListener(newServiceWorker);
+        if (!updateNotificationShown) {
+            mostrarNotificacionActualizacion();
+        }
+    }
+    
+    // Verificar si hay uno instalándose
+    if (reg.installing) {
+        console.log('[PWA] SW instalándose al registrar');
+        newServiceWorker = reg.installing;
+        setupServiceWorkerListener(newServiceWorker);
+    }
+    
+    // Escuchar por nuevas actualizaciones
+    reg.addEventListener('updatefound', () => {
+        console.log('[PWA] Nueva versión detectada en updatefound');
+        newServiceWorker = reg.installing;
+        
+        if (newServiceWorker) {
+            setupServiceWorkerListener(newServiceWorker);
+        }
+    });
+}
+
+// Función para configurar el listener del service worker
+function setupServiceWorkerListener(sw) {
+    sw.addEventListener('statechange', () => {
+        console.log('[PWA] Estado del SW cambiado a:', sw.state);
+        
+        switch (sw.state) {
+            case 'installed':
+                if (navigator.serviceWorker.controller) {
+                    // Hay una nueva versión disponible
+                    console.log('[PWA] Nueva versión lista para instalar');
+                    if (!updateNotificationShown) {
+                        updateNotificationShown = true;
+                        setTimeout(() => {
+                            mostrarNotificacionActualizacion();
+                        }, 1000); // Reducido a 1 segundo
+                    }
+                } else {
+                    // Primera instalación
+                    console.log('[PWA] PWA instalada por primera vez');
+                }
+                break;
+            case 'redundant':
+                console.log('[PWA] SW se volvió redundante');
+                break;
+        }
     });
 }
 
@@ -109,7 +152,7 @@ function mostrarNotificacionActualizacion() {
     document.body.appendChild(notification);
     console.log('[PWA] Notificación mostrada');
     
-    // Auto-cerrar después de 30 segundos (aumentado el tiempo)
+    // Auto-cerrar después de 30 segundos
     setTimeout(() => {
         if (document.getElementById('update-notification')) {
             console.log('[PWA] Auto-cerrando notificación por timeout');
@@ -130,14 +173,17 @@ function actualizarAplicacion() {
         
         // Fallback: si no responde en 3 segundos, recargar manualmente
         setTimeout(() => {
-            console.log('[PWA] Fallback: recargando manualmente');
-            window.location.reload();
+            if (!refreshing) {
+                console.log('[PWA] Fallback: recargando manualmente');
+                window.location.reload();
+            }
         }, 3000);
     } else {
         console.log('[PWA] No hay nuevo SW, recargando directamente');
         window.location.reload();
     }
 }
+
 // Función para cerrar la notificación
 function cerrarNotificacion() {
     const notification = document.getElementById('update-notification');
@@ -154,43 +200,55 @@ function cerrarNotificacion() {
     }
 }
 
-// Función para verificar manualmente actualizaciones (opcional)
+// Función para verificar manualmente actualizaciones (CORREGIDA)
 function verificarActualizaciones() {
     console.log('[PWA] Verificación manual iniciada');
     
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistration('/ExpenseControl/service-worker.js')
-            .then((registration) => {
-                if (registration) {
-                    console.log('[PWA] Forzando verificación de actualización');
-                    
-                    // Verificar si ya hay un SW esperando
-                    if (registration.waiting) {
-                        console.log('[PWA] SW esperando encontrado');
-                        newServiceWorker = registration.waiting;
-                        updateNotificationShown = false;
-                        mostrarNotificacionActualizacion();
-                        return Promise.resolve();
-                    }
-                    
-                    // Si no hay SW esperando, buscar actualizaciones
-                    return registration.update();
-                }
-            })
-            .then(() => {
-                // Solo mostrar "no hay actualizaciones" si realmente no las hay
-                setTimeout(() => {
-                    if (!newServiceWorker || newServiceWorker.state !== 'installed') {
-                        console.log('[PWA] No se encontraron actualizaciones');
-                        mostrarMensajeNoActualizacion();
-                    }
-                }, 3000);
-            })
-            .catch((error) => {
-                console.error('[PWA] Error en verificación:', error);
-            });
+    if (!registration) {
+        console.log('[PWA] No hay registration disponible');
+        return;
     }
+    
+    // Primero verificar si ya hay un SW esperando
+    if (registration.waiting) {
+        console.log('[PWA] SW esperando encontrado');
+        newServiceWorker = registration.waiting;
+        if (!updateNotificationShown) {
+            updateNotificationShown = true;
+            mostrarNotificacionActualizacion();
+        }
+        return;
+    }
+    
+    // Si no hay SW esperando, buscar actualizaciones
+    console.log('[PWA] Buscando nuevas actualizaciones...');
+    registration.update()
+        .then(() => {
+            console.log('[PWA] Update() completado');
+            
+            // Dar tiempo para que se procese la actualización
+            setTimeout(() => {
+                if (registration.waiting && !updateNotificationShown) {
+                    console.log('[PWA] Nueva actualización encontrada después de update()');
+                    newServiceWorker = registration.waiting;
+                    updateNotificationShown = true;
+                    mostrarNotificacionActualizacion();
+                } else if (registration.installing) {
+                    console.log('[PWA] SW instalándose, esperando...');
+                    newServiceWorker = registration.installing;
+                    setupServiceWorkerListener(newServiceWorker);
+                } else {
+                    console.log('[PWA] No se encontraron actualizaciones');
+                    mostrarMensajeNoActualizacion();
+                }
+            }, 2000); // Dar 2 segundos para que se procese
+        })
+        .catch((error) => {
+            console.error('[PWA] Error en verificación:', error);
+        });
 }
+
+// Función para mostrar mensaje de no actualización
 function mostrarMensajeNoActualizacion() {
     const mensaje = document.createElement('div');
     mensaje.innerHTML = `
@@ -219,7 +277,7 @@ function mostrarMensajeNoActualizacion() {
     }, 3000);
 }
 
-// Función para obtener la versión actual (opcional)
+// Función para obtener la versión actual
 function obtenerVersionActual() {
     return new Promise((resolve) => {
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -256,5 +314,19 @@ console.log('[PWA] Sistema de actualización inicializado');
 // Función temporal para probar la notificación
 window.testNotificacion = function() {
     console.log('[PWA] Forzando notificación de prueba');
+    updateNotificationShown = false; // Resetear para permitir mostrar
     mostrarNotificacionActualizacion();
+};
+
+// Función de debug para ver el estado
+window.debugPWA = function() {
+    console.log('[PWA DEBUG] Estado actual:', {
+        registration: !!registration,
+        newServiceWorker: !!newServiceWorker,
+        updateNotificationShown,
+        refreshing,
+        waiting: registration?.waiting,
+        installing: registration?.installing,
+        active: registration?.active
+    });
 };
