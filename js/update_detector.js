@@ -26,11 +26,17 @@ if ('serviceWorker' in navigator) {
             console.error('[PWA] Error al registrar Service Worker:', error);
         });
     
-    // Escuchar cuando el SW toma control
+    // Escuchar cuando el SW toma control (SOLO si el usuario eligió actualizar)
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
+        // Solo recargar si el usuario eligió actualizar explícitamente
+        if (updateNotificationShown && document.getElementById('update-notification')) {
+            // Hay una notificación activa, no recargar automáticamente
+            console.log('[PWA] Nuevo SW tomó control, pero esperando decisión del usuario');
+            return;
+        }
         refreshing = true;
-        console.log('[PWA] Recargando por nueva versión');
+        console.log('[PWA] Recargando por nueva versión (autorizada por usuario)');
         window.location.reload();
     });
 }
@@ -163,21 +169,35 @@ function mostrarNotificacionActualizacion() {
 
 // Función para actualizar la aplicación
 function actualizarAplicacion() {
-    console.log('[PWA] Iniciando actualización...');
+    console.log('[PWA] Usuario eligió actualizar - iniciando actualización...');
+    
+    // Marcar que el usuario autorizó la actualización
+    refreshing = true;
+    
+    // Cerrar notificación inmediatamente
+    cerrarNotificacion();
+    
     if (newServiceWorker) {
         console.log('[PWA] Enviando skipWaiting al nuevo SW');
+        
+        // Escuchar el evento controllerchange específicamente para esta actualización
+        const handleControllerChange = () => {
+            console.log('[PWA] Nuevo SW tomó control, recargando...');
+            navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+            window.location.reload();
+        };
+        
+        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+        
+        // Enviar skipWaiting
         newServiceWorker.postMessage({ action: 'skipWaiting' });
         
-        // Cerrar notificación inmediatamente
-        cerrarNotificacion();
-        
-        // Fallback: si no responde en 3 segundos, recargar manualmente
+        // Fallback: si no responde en 5 segundos, recargar manualmente
         setTimeout(() => {
-            if (!refreshing) {
-                console.log('[PWA] Fallback: recargando manualmente');
-                window.location.reload();
-            }
-        }, 3000);
+            console.log('[PWA] Fallback: recargando manualmente');
+            navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+            window.location.reload();
+        }, 5000);
     } else {
         console.log('[PWA] No hay nuevo SW, recargando directamente');
         window.location.reload();
@@ -188,13 +208,13 @@ function actualizarAplicacion() {
 function cerrarNotificacion() {
     const notification = document.getElementById('update-notification');
     if (notification) {
-        console.log('[PWA] Cerrando notificación');
+        console.log('[PWA] Usuario eligió cerrar notificación - respetando decisión');
         notification.style.animation = 'slideUp 0.3s ease-in';
         setTimeout(() => {
             if (notification && notification.parentNode) {
                 notification.remove();
                 updateNotificationShown = false; // Resetear flag
-                console.log('[PWA] Notificación cerrada');
+                console.log('[PWA] Notificación cerrada por usuario');
             }
         }, 300);
     }
