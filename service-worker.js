@@ -26,7 +26,8 @@ self.addEventListener("install", (event) => {
             })
             .then(() => {
                 console.log('[SW] Archivos cacheados exitosamente');
-                return self.skipWaiting(); // Fuerza la activación inmediata
+                // NO hacer skipWaiting automáticamente - esperar instrucción del usuario
+                console.log('[SW] Esperando instrucción del usuario para activar');
             })
     );
 });
@@ -80,36 +81,61 @@ self.addEventListener("fetch", (event) => {
 });
 
 // Manejar mensajes desde la aplicación principal
-
 self.addEventListener('message', (event) => {
     console.log('[SW] Mensaje recibido:', event.data);
     
     if (event.data && event.data.action === 'skipWaiting') {
-        console.log('[SW] Ejecutando skipWaiting inmediatamente');
+        console.log('[SW] Ejecutando skipWaiting por solicitud del usuario');
         self.skipWaiting();
         return;
     }
     
     if (event.data && event.data.action === 'getVersion') {
-        event.ports[0].postMessage({ version: CACHE_NAME });
+        // Usar MessageChannel para responder
+        if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({ version: CACHE_NAME });
+        } else {
+            // Fallback para casos sin MessageChannel
+            event.source?.postMessage({ version: CACHE_NAME });
+        }
         return;
     }
     
     if (event.data && event.data.action === 'checkUpdate') {
+        console.log('[SW] Verificando actualizaciones por solicitud');
         self.registration.update().then(() => {
             console.log('[SW] Verificación de actualización completada');
+        }).catch((error) => {
+            console.error('[SW] Error al verificar actualización:', error);
         });
         return;
     }
 });
 
-// Notificar a los clientes cuando hay una nueva versión disponible
-self.addEventListener('message', (event) => {
-    if (event.data && event.data.action === 'checkUpdate') {
-        self.registration.update().then(() => {
-            console.log('[SW] Verificación de actualización completada');
-        });
-    }
+// Notificar a los clientes cuando el SW está listo para tomar control
+self.addEventListener('install', (event) => {
+    console.log('[SW] Instalando nueva versión:', CACHE_NAME);
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                console.log('[SW] Cacheando archivos');
+                return cache.addAll(urlsToCache);
+            })
+            .then(() => {
+                console.log('[SW] Archivos cacheados exitosamente');
+                // Notificar a los clientes que hay una nueva versión disponible
+                return self.clients.matchAll();
+            })
+            .then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({
+                        type: 'NEW_VERSION_AVAILABLE',
+                        version: CACHE_NAME
+                    });
+                });
+                console.log('[SW] Clientes notificados sobre nueva versión');
+            })
+    );
 });
 
 // Limpiar recursos al ser reemplazado
