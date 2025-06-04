@@ -163,34 +163,34 @@ function verificarActualizaciones() {
             .then((registration) => {
                 if (registration) {
                     console.log('[PWA] Forzando verificación de actualización');
+                    
+                    // Verificar si ya hay un SW esperando
+                    if (registration.waiting) {
+                        console.log('[PWA] SW esperando encontrado');
+                        newServiceWorker = registration.waiting;
+                        updateNotificationShown = false;
+                        mostrarNotificacionActualizacion();
+                        return Promise.resolve();
+                    }
+                    
+                    // Si no hay SW esperando, buscar actualizaciones
                     return registration.update();
                 }
             })
             .then(() => {
-                console.log('[PWA] Verificación completada, esperando resultado...');
-                
-                // Esperar un momento para que se procese la actualización
+                // Solo mostrar "no hay actualizaciones" si realmente no las hay
                 setTimeout(() => {
-                    if (newServiceWorker && newServiceWorker.state === 'installed') {
-                        console.log('[PWA] Nueva versión encontrada, mostrando notificación');
-                        // Resetear el flag para permitir mostrar la notificación manualmente
-                        updateNotificationShown = false;
-                        mostrarNotificacionActualizacion();
-                    } else {
+                    if (!newServiceWorker || newServiceWorker.state !== 'installed') {
                         console.log('[PWA] No se encontraron actualizaciones');
                         mostrarMensajeNoActualizacion();
                     }
-                }, 2000);
+                }, 3000);
             })
             .catch((error) => {
                 console.error('[PWA] Error en verificación:', error);
-                mostrarMensajeNoActualizacion();
             });
-    } else {
-        console.log('[PWA] Service Worker no disponible');
     }
 }
-
 function mostrarMensajeNoActualizacion() {
     const mensaje = document.createElement('div');
     mensaje.innerHTML = `
