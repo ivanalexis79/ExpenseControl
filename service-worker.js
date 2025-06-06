@@ -1,4 +1,4 @@
-const CACHE_NAME = "gastos-pwa-cache-v1.0.15"; // Incrementa la versión en cada actualización
+const CACHE_NAME = "gastos-pwa-cache-v1.6.06"; // Incrementa la versión en cada actualización
 const urlsToCache = [
     "/ExpenseControl/",
     "/ExpenseControl/index.html",
