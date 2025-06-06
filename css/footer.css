@@ -20,7 +20,7 @@
     padding: 0 !important;
     background-color: #ffffff;
     /* Solo el padding superior mínimo necesario para el recorte del círculo */
-    padding-top: 15px !important;
+    padding-top: 16px !important;
     min-height: auto !important;
 }
 
@@ -33,7 +33,7 @@
     /* Eliminar cualquier padding o margin */
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 48px; /* Altura mínima para los botones */
+    min-height: 24px; /* Altura mínima para los botones */
 }
 
 /* Optimizar botones del footer - eliminar paddings */
