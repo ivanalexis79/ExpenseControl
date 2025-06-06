@@ -1,6 +1,6 @@
 /* Mantener funcionalidades actuales */
 .mdl-layout__content {
-    padding-bottom: 40px !important; /* Reducir a la mitad también */
+    padding-bottom: 40px !important;
 }
 
 .fixed-footer {
@@ -16,10 +16,12 @@
 }
 
 .mdl-mini-footer {
-    padding: 8px 20px 10px !important; /* Reducir padding a la mitad */
+    /* Eliminar todos los paddings para minimizar altura */
+    padding: 0 !important;
     background-color: #ffffff;
-    /* Reducir padding superior */
-    padding-top: 18px !important; /* La mitad del anterior */
+    /* Solo el padding superior mínimo necesario para el recorte del círculo */
+    padding-top: 15px !important;
+    min-height: auto !important;
 }
 
 .mdl-mini-footer__left-section {
@@ -28,15 +30,29 @@
     align-items: center;
     width: 100%;
     position: relative;
+    /* Eliminar cualquier padding o margin */
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 48px; /* Altura mínima para los botones */
 }
 
-/* Mejorar botones del footer */
+/* Optimizar botones del footer - eliminar paddings */
 .mdl-mini-footer__left-section .mdl-button {
-    min-width: 48px;
-    min-height: 48px;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
     border-radius: 50%;
     color: #757575;
     transition: all 0.3s ease;
+    /* Eliminar todos los paddings y margins */
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* Asegurar que no haya espacios extra */
+    box-sizing: border-box !important;
 }
 
 .mdl-mini-footer__left-section .mdl-button:hover {
@@ -44,14 +60,22 @@
     color: #333;
 }
 
+/* Asegurar que los iconos no agreguen espacio extra */
+.mdl-mini-footer__left-section .mdl-button .material-icons {
+    font-size: 24px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 /* Corregir el botón FAB - mantener funcionalidad pero reposicionar */
 .mdl-button--fab {
     position: fixed !important;
-    bottom: 45px !important; /* Ajustar para footer más bajo */
+    bottom: 35px !important; /* Ajustar para footer más bajo */
     left: 50% !important;
     transform: translateX(-50%) !important;
     right: auto !important;
-    z-index: 1003 !important; /* Más alto que el pseudo-elemento */
+    z-index: 1003 !important;
     /* Asegurar que se mantenga perfectamente circular */
     width: 56px !important;
     height: 56px !important;
@@ -63,6 +87,7 @@
     min-width: 56px !important;
     min-height: 56px !important;
     padding: 0 !important;
+    margin: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -81,6 +106,9 @@
 .mdl-button--fab .material-icons {
     color: white !important;
     font-size: 24px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Asegurar que el ripple funcione correctamente */
@@ -101,8 +129,23 @@
 /* Responsive */
 @media (max-width: 480px) {
     .mdl-mini-footer {
-        padding: 6px 16px 8px !important; /* Reducir responsive también */
-        padding-top: 15px !important;
+        padding: 0 !important;
+        padding-top: 12px !important; /* Reducir aún más en móviles */
+    }
+    
+    .mdl-mini-footer__left-section {
+        min-height: 44px; /* Reducir altura en móviles */
+    }
+    
+    .mdl-mini-footer__left-section .mdl-button {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+    }
+    
+    .mdl-mini-footer__left-section .mdl-button .material-icons {
+        font-size: 22px !important;
     }
     
     .mdl-button--fab {
@@ -110,7 +153,7 @@
         height: 52px !important;
         min-width: 52px !important;
         min-height: 52px !important;
-        bottom: 40px !important;
+        bottom: 30px !important; /* Ajustar para footer más bajo en móviles */
     }
     
     .mdl-button--fab .material-icons {
