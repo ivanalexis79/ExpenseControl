@@ -20,11 +20,7 @@ body {
   overscroll-behavior-y: none; /* Específico para vertical */
 }
 
-/*No seleccionar texto*/
-* {
-  user-select: none;
-  touch-action: manipulation; /* Mueve esto aquí */
-}
+
 
 /* Específico para prevenir zoom */
 html {
