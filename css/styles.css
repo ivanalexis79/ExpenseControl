@@ -7,17 +7,23 @@ canvas {
     margin: auto;
 }
 
-.fixed-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: #607D8B;
-    padding: 10px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
+/* Solución para evitar superposición con el footer */
+.mdl-layout__content {
+    padding-bottom: 80px !important;
 }
 
-.mdl-mini-footer__left-section button {
-    color: white;
+.fixed-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+}
+
+/* Ajustar el botón FAB para que no se superponga */
+.mdl-button--fab {
+    position: fixed !important;
+    bottom: 90px !important;
+    right: 20px !important;
+    z-index: 999 !important;
 }
