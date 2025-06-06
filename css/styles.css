@@ -18,24 +18,9 @@ canvas {
     right: 0 !important;
     z-index: 1000 !important;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    /* Remover clip-path y usar pseudo-elemento para el recorte */
-}
-
-/* Crear el recorte semicircular perfecto */
-.fixed-footer::before {
-    content: '';
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 60px;
-    background: #ffffff;
-    border-radius: 50%;
-    z-index: 1002;
-    /* Crear el efecto de recorte */
-    box-shadow: 0 0 0 100vw #ffffff;
-    clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+    /* Crear el recorte semicircular con máscara radial */
+    -webkit-mask: radial-gradient(circle 40px at 50% 0%, transparent 39px, black 40px);
+    mask: radial-gradient(circle 40px at 50% 0%, transparent 39px, black 40px);
 }
 
 .mdl-mini-footer {
