@@ -2,525 +2,383 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
- 
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Gastos</title>
-    <link rel="manifest" href="/ExpenseControl/manifest.json">
-    <link rel="icon" href="assets/gastos.png">
-
-    <link rel="stylesheet" href="mdl/material.min.css">
-    <script src="mdl/material.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">    
-    
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/pwa.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Scripts en el orden correcto -->
-    <script defer src="js/pwa.js"></script>
-    <script defer src="js/db.js"></script>
-    <script defer src="js/app.js"></script>
-    <script defer src="js/categorias.js"></script>
-    <script defer src="js/chart.js"></script>
-    <script src="js/update_detector.js"></script>
-
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 <body>
 
 <div class="mdl-layout mdl-js-layout">
   <header class="mdl-layout__header mdl-layout__header--transparent">
     <div class="mdl-layout__header-row">
-      <!-- Title -->
       <span class="mdl-layout-title">Gestor de Gastos</span>
-      <!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
-      <!-- Navigation -->
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link" onclick="verificarActualizaciones()" href="">Buscar Actualizaciones</a>
-
+        <a class="mdl-navigation__link" href="#">Buscar Actualizaciones</a>
       </nav>
     </div>
   </header>
+  
   <div class="mdl-layout__drawer">
     <span class="mdl-layout-title">Gestor de Gastos</span>
     <nav class="mdl-navigation">
-      <a class="mdl-navigation__link" onclick="verificarActualizaciones()" href="">Buscar Actualizaciones</a>
-      <a class="mdl-navigation__link" href="">Link</a>
-      <a class="mdl-navigation__link" href="">Link</a>
-      <a class="mdl-navigation__link" href="">Link</a>
+      <a class="mdl-navigation__link" href="#">Buscar Actualizaciones</a>
+      <a class="mdl-navigation__link" href="#">Link</a>
+      <a class="mdl-navigation__link" href="#">Link</a>
+      <a class="mdl-navigation__link" href="#">Link</a>
     </nav>
   </div>
-  <main class="mdl-layout__content">
-      <div class="page-content"><!-- Your content goes here -->
-
-<!-- Colored FAB button with ripple -->
-<button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
-  <i class="material-icons">add</i>
-</button>
+  
+  <main class="mdl-layout__content main-content">
+    <div class="page-content">
+      <!-- FAB Button -->
+      <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored fab-button">
+        <i class="material-icons">add</i>
+      </button>
           
-          
-          <div class="container">
+      <div class="container">
+        <!-- Sección del gráfico -->
+        <section class="chart-section">
+          <h2>Gastos por Categoría</h2>
+          <div class="header-controls">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              🔄 Actualizar App
+            </button>
+          </div>
+          <div class="chart-container">
+            <div style="width: 300px; height: 300px; background: #f0f0f0; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+              <span>Gráfico Placeholder</span>
+            </div>
+          </div>
+          <div class="chart-controls">
+            <button class="btn btn-secondary">📊 Actualizar Gráfico</button>
+            <button class="btn btn-secondary">📅 Solo Este Mes</button>
+          </div>
+        </section>
 
-            <!-- Sección del gráfico -->
-            <section class="chart-section">
-                <h2>Gastos por Categoría</h2>
+        <!-- Formulario para agregar gastos -->
+        <section class="form-section">
+          <div class="section-header">
+            <h2>Agregar Nuevo Gasto</h2>
+            <button class="btn btn-secondary">🏷️ Gestionar Categorías</button>
+          </div>
+          <form id="formGasto">
+            <div class="form-group">
+              <label for="monto">💵 Monto:</label>
+              <input type="number" id="monto" name="monto" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="descripcion">📝 Descripción:</label>
+              <input type="text" id="descripcion" name="descripcion" placeholder="Ej: Almuerzo, Gasolina..." required>
+            </div>
+            <div class="form-group">
+              <label for="categoria">🏷️ Categoría:</label>
+              <select id="categoria" name="categoria" required>
+                <option value="">Seleccionar categoría...</option>
+                <option value="comida">Comida</option>
+                <option value="transporte">Transporte</option>
+                <option value="entretenimiento">Entretenimiento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fecha">📅 Fecha:</label>
+              <input type="date" id="fecha" name="fecha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">➕ Agregar Gasto</button>
+          </form>
+        </section>
 
-<div class="header-controls">
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" onclick="verificarActualizaciones()" >
-        🔄 Actualizar App
-    </button>
-</div>
+        <!-- Resumen de gastos -->
+        <section class="summary-section">
+          <h2>Resumen</h2>
+          <div id="resumenGastos" class="summary-cards">
+            <div class="summary-card">
+              <h3>Total Gastos</h3>
+              <p id="totalGastos">$1,250.00</p>
+            </div>
+            <div class="summary-card">
+              <h3>Este Mes</h3>
+              <p id="gastosMes">$450.00</p>
+            </div>
+            <div class="summary-card">
+              <h3>Cantidad</h3>
+              <p id="cantidadGastos">12</p>
+            </div>
+          </div>
+        </section>
 
-                <div class="chart-container">
-                    <canvas id="graficoGastos"></canvas>
-                </div>
-                <div class="chart-controls">
-                    <button onclick="window.actualizarGrafico()" class="btn btn-secondary">
-                        📊 Actualizar Gráfico
-                    </button>
-                    <button onclick="window.mostrarGraficoMesActual()" class="btn btn-secondary">
-                        📅 Solo Este Mes
-                    </button>
-                </div>
-            </section>
-
-            <!-- Formulario para agregar gastos -->
-            <section class="form-section">
-                <div class="section-header">
-                    <h2>Agregar Nuevo Gasto</h2>
-                    <button onclick="mostrarGestorCategorias()" class="btn btn-secondary">
-                        🏷️ Gestionar Categorías
-                    </button>
-                </div>
-                <form id="formGasto">
-                    <div class="form-group">
-                        <label for="monto">💵 Monto:</label>
-                        <input type="number" id="monto" name="monto" step="0.01" min="0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="descripcion">📝 Descripción:</label>
-                        <input type="text" id="descripcion" name="descripcion" placeholder="Ej: Almuerzo, Gasolina..." required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="categoria">🏷️ Categoría:</label>
-                        <select id="categoria" name="categoria" required>
-                            <option value="">Seleccionar categoría...</option>
-                            <!-- Las opciones se llenan dinámicamente desde la DB -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fecha">📅 Fecha:</label>
-                        <input type="date" id="fecha" name="fecha" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        ➕ Agregar Gasto
-                    </button>
-                </form>
-            </section>
-
-            <!-- Resumen de gastos -->
-            <section class="summary-section">
-                <h2>Resumen</h2>
-                <div id="resumenGastos" class="summary-cards">
-                    <div class="summary-card">
-                        <h3>Total Gastos</h3>
-                        <p id="totalGastos">$0.00</p>
-                    </div>
-                    <div class="summary-card">
-                        <h3>Este Mes</h3>
-                        <p id="gastosMes">$0.00</p>
-                    </div>
-                    <div class="summary-card">
-                        <h3>Cantidad</h3>
-                        <p id="cantidadGastos">0</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Lista de gastos recientes -->
-            <section class="list-section">
-                <h2>Gastos Recientes</h2>
-                <div class="list-controls">
-                    <button onclick="cargarGastos()" class="btn btn-secondary">
-                        🔄 Actualizar Lista
-                    </button>
-                    <button onclick="mostrarSoloMesActual()" class="btn btn-secondary">
-                        📅 Solo Este Mes
-                    </button>
-                </div>
-                <div id="listaGastos" class="gastos-list">
-                    <!-- Los gastos se cargan dinámicamente aquí -->
-                </div>
-            </section>
-         </div>
-
-    <!-- Modal para editar gastos -->
-    <div id="modalEditar" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModal()">&times;</span>
-            <h2>Editar Gasto</h2>
-            <form id="formEditar" onsubmit="guardarEdicion(event)">
-                <input type="hidden" id="editarId">
-                
-                <div class="form-group">
-                    <label for="editarMonto">💵 Monto:</label>
-                    <input type="number" id="editarMonto" step="0.01" min="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editarDescripcion">📝 Descripción:</label>
-                    <input type="text" id="editarDescripcion" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editarCategoria">🏷️ Categoría:</label>
-                    <select id="editarCategoria" required>
-                        <!-- Las opciones se llenan dinámicamente -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editarFecha">📅 Fecha:</label>
-                    <input type="date" id="editarFecha" required>
-                </div>
-
-                <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
-                    <button type="button" onclick="cerrarModal()" class="btn btn-secondary">❌ Cancelar</button>
-                </div>
-            </form>
-        </div>
+        <!-- Lista de gastos recientes -->
+        <section class="list-section">
+          <h2>Gastos Recientes</h2>
+          <div class="list-controls">
+            <button class="btn btn-secondary">🔄 Actualizar Lista</button>
+            <button class="btn btn-secondary">📅 Solo Este Mes</button>
+          </div>
+          <div id="listaGastos" class="gastos-list">
+            <div class="gasto-item" style="border-left-color: #667eea;">
+              <div class="gasto-info">
+                <strong>Almuerzo - Comida</strong><br>
+                <small>2024-01-15</small>
+              </div>
+              <div class="gasto-actions">
+                <span style="font-weight: bold; margin-right: 10px;">$25.00</span>
+                <button class="btn btn-small btn-secondary">✏️</button>
+                <button class="btn btn-small" style="background: #f56565; color: white;">🗑️</button>
+              </div>
+            </div>
+            <div class="gasto-item" style="border-left-color: #48bb78;">
+              <div class="gasto-info">
+                <strong>Gasolina - Transporte</strong><br>
+                <small>2024-01-14</small>
+              </div>
+              <div class="gasto-actions">
+                <span style="font-weight: bold; margin-right: 10px;">$40.00</span>
+                <button class="btn btn-small btn-secondary">✏️</button>
+                <button class="btn btn-small" style="background: #f56565; color: white;">🗑️</button>
+              </div>
+            </div>
+            <div class="gasto-item" style="border-left-color: #ed8936;">
+              <div class="gasto-info">
+                <strong>Cine - Entretenimiento</strong><br>
+                <small>2024-01-13</small>
+              </div>
+              <div class="gasto-actions">
+                <span style="font-weight: bold; margin-right: 10px;">$15.00</span>
+                <button class="btn btn-small btn-secondary">✏️</button>
+                <button class="btn btn-small" style="background: #f56565; color: white;">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
-
-    <!-- Loading indicator -->
-    <div id="loading" class="loading" style="display: none;">
-        <div class="spinner"></div>
-        <p>Cargando...</p>
-    </div>
-
-    <!-- Toast notifications -->
-    <div id="toast" class="toast"></div>
-
-</div>
-      
   </main>
 </div>
 
-    <style>
-        /* Estilos básicos incorporados */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!-- Footer fijo -->
+<footer class="mdl-mini-footer fixed-footer">
+  <div class="mdl-mini-footer__left-section">
+    <button class="mdl-button mdl-js-button mdl-button--icon">
+      <i class="material-icons">home</i>
+    </button>
+    <button class="mdl-button mdl-js-button mdl-button--icon">
+      <i class="material-icons">settings</i>
+    </button>
+    <button class="mdl-button mdl-js-button mdl-button--icon">
+      <i class="material-icons">help</i>
+    </button>
+  </div>
+</footer>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #081f7a 0%, #d4cadd 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+<style>
+/* Estilos básicos incorporados */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #081f7a 0%, #d4cadd 100%);
+    min-height: 100vh;
+    color: #333;
+}
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+/* SOLUCIÓN 1: Agregar padding-bottom al contenido principal */
+.main-content {
+    padding-bottom: 80px !important; /* Espacio para el footer */
+}
 
-        h1 {
-            color: white;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+/* SOLUCIÓN 2: Asegurar que el footer esté siempre al final */
+.fixed-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
 
-        section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+/* Ajuste del FAB para que no se superponga con el footer */
+.fab-button {
+    position: fixed !important;
+    bottom: 90px !important; /* Encima del footer */
+    right: 20px !important;
+    z-index: 999 !important;
+}
 
-        h2 {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+h1 {
+    color: white;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
 
-        .section-header h2 {
-            margin-bottom: 0;
-        }
+section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
 
-        .chart-container {
-            max-width: 400px;
-            margin: 0 auto 20px;
-        }
+h2 {
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
 
-        .chart-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+.section-header h2 {
+    margin-bottom: 0;
+}
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #4a5568;
-        }
+.chart-container {
+    max-width: 400px;
+    margin: 0 auto 20px;
+}
 
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
+.chart-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+.form-group {
+    margin-bottom: 15px;
+}
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
-            text-decoration: none;
-        }
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #4a5568;
+}
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
 
-        .btn-primary:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
+input:focus, select:focus {
+    outline: none;
+    border-color: #667eea;
+}
 
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+    text-decoration: none;
+}
 
-        .btn-secondary:hover {
-            background: #cbd5e0;
-        }
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
 
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
+.btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+}
 
-        .summary-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
 
-        .summary-card h3 {
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
 
-        .summary-card p {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
 
-        .list-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+.summary-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
 
-        .gastos-list {
-            display: grid;
-            gap: 10px;
-        }
+.summary-card h3 {
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
 
-        .gasto-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
-            border-left: 4px solid;
-        }
+.summary-card p {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
 
-        .gasto-info {
-            flex: 1;
-        }
+.list-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
 
-        .gasto-actions {
-            display: flex;
-            gap: 10px;
-        }
+.gastos-list {
+    display: grid;
+    gap: 10px;
+}
 
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 14px;
-        }
+.gasto-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
 
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.gasto-info {
+    flex: 1;
+}
 
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
+.gasto-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 
-        .close {
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #aaa;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            z-index: 1500;
-            transform: translateX(400px);
-            transition: transform 0.3s;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            background: #48bb78;
-        }
-
-        .toast.error {
-            background: #f56565;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .chart-controls, .list-controls {
-                justify-content: center;
-            }
-            
-            .gasto-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .gasto-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
+.btn-small {
+    padding: 6px 12px;
+    font-size: 14px;
+}
 
 .header-controls {
     margin-top: 15px;
@@ -541,29 +399,43 @@
     border-color: rgba(255,255,255,0.5);
     transform: translateY(-1px);
 }
+
 .btn-update:active {
     transform: translateY(0);
     background: rgba(255,255,255,0.4);
 }
-    </style>
-</head>
 
-   
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
     
+    .chart-controls, .list-controls {
+        justify-content: center;
+    }
+    
+    .gasto-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .gasto-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    /* Ajuste del padding en móvil */
+    .main-content {
+        padding-bottom: 90px !important;
+    }
+    
+    .fab-button {
+        bottom: 100px !important;
+    }
+}
+</style>
+
 </body>
-
-<footer class="mdl-mini-footer fixed-footer">
-    <div class="mdl-mini-footer__left-section">
-        <button class="mdl-button mdl-js-button mdl-button--icon">
-            <i class="material-icons">home</i>
-        </button>
-        <button class="mdl-button mdl-js-button mdl-button--icon">
-            <i class="material-icons">settings</i>
-        </button>
-        <button class="mdl-button mdl-js-button mdl-button--icon">
-            <i class="material-icons">help</i>
-        </button>
-    </div>
-</footer>
-    
 </html>
