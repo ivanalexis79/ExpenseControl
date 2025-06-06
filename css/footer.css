@@ -134,7 +134,7 @@
 @media (max-width: 480px) {
     .mdl-mini-footer {
         padding: 0 !important;
-        padding-top: 12px !important; /* Reducir aún más en móviles */
+        padding-top: 24px !important; /* Reducir aún más en móviles ajusta boton en el sacado*/
     }
     
     .mdl-mini-footer__left-section {
