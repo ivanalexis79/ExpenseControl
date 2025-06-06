@@ -1,7 +1,7 @@
 .fixed-footer {
         /* Ajustar máscara para botón FAB más pequeño en móviles */
-        -webkit-mask: radial-gradient(circle 26px at 50% -13px, transparent 25px, black 26px);
-        mask: radial-gradient(circle 26px at 50% -13px, transparent 25px, black 26px);
+        -webkit-mask: radial-gradient(circle 26px at 50% -11px, transparent 25px, black 26px);
+        mask: radial-gradient(circle 26px at 50% -11px, transparent 25px, black 26px);
     }/* Mantener funcionalidades actuales */
 .mdl-layout__content {
     padding-bottom: 40px !important;
@@ -14,9 +14,9 @@
     right: 0 !important;
     z-index: 1000 !important;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    /* Crear el recorte del tercio inferior del círculo con máscara radial - ajustar para el botón FAB */
-    -webkit-mask: radial-gradient(circle 28px at 50% -14px, transparent 27px, black 28px);
-    mask: radial-gradient(circle 28px at 50% -14px, transparent 27px, black 28px);
+    /* Crear el recorte del tercio inferior del círculo con máscara radial */
+    -webkit-mask: radial-gradient(circle 28px at 50% -12px, transparent 27px, black 28px);
+    mask: radial-gradient(circle 28px at 50% -12px, transparent 27px, black 28px);
 }
 
 .mdl-mini-footer {
@@ -75,11 +75,11 @@
 /* Corregir el botón FAB - mantener funcionalidad pero reposicionar */
 .mdl-button--fab {
     position: fixed !important;
-    bottom: 48px !important; /* Posicionar arriba del footer para que solo el tercio inferior esté dentro */
+    bottom: 40px !important; /* Posicionar para que parte esté sobre el footer */
     left: 50% !important;
     transform: translateX(-50%) !important;
     right: auto !important;
-    z-index: 999 !important; /* Z-index menor que el footer para que el recorte funcione */
+    z-index: 1001 !important; /* Z-index más alto que el footer para estar visible */
     /* Asegurar que se mantenga perfectamente circular */
     width: 56px !important;
     height: 56px !important;
@@ -157,8 +157,8 @@
         height: 52px !important;
         min-width: 52px !important;
         min-height: 52px !important;
-        bottom: 44px !important; /* Posicionar arriba del footer en móviles */
-        z-index: 999 !important;
+        bottom: 36px !important; /* Ajustar posición en móviles */
+        z-index: 1001 !important;
     }
     
     .mdl-button--fab .material-icons {
