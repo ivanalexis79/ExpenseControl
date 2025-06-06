@@ -157,7 +157,7 @@
         height: 52px !important;
         min-width: 52px !important;
         min-height: 52px !important;
-        bottom: 32px !important; /* Ajustar posición en móviles */
+        bottom: 44px !important; /* Ajustar posición en móviles */
         z-index: 1001 !important;
     }
     
