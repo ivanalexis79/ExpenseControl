@@ -13,6 +13,8 @@
     /* Crear el recorte del tercio inferior del círculo con máscara radial */
     -webkit-mask: radial-gradient(circle 40px at 50% -25px, transparent 39px, black 40px);
     mask: radial-gradient(circle 40px at 50% -25px, transparent 39px, black 40px);
+    /* Asegurar que la máscara no afecte elementos hijos con z-index alto */
+    isolation: isolate;
 }
 
 .mdl-mini-footer {
@@ -20,7 +22,7 @@
     padding: 0 !important;
     background-color: #ffffff;
     /* Solo el padding superior mínimo necesario para el recorte del círculo */
-    padding-top: 16px !important;
+    padding-top: 15px !important;
     min-height: auto !important;
 }
 
@@ -33,13 +35,13 @@
     /* Eliminar cualquier padding o margin */
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 24px; /* Altura mínima para los botones */
+    min-height: 48px; /* Altura mínima para los botones */
 }
 
 /* Optimizar botones del footer - eliminar paddings */
 .mdl-mini-footer__left-section .mdl-button {
-    min-width: 24px !important;
-    min-height: 24px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
     width: 48px !important;
     height: 48px !important;
     border-radius: 50%;
@@ -71,11 +73,11 @@
 /* Corregir el botón FAB - mantener funcionalidad pero reposicionar */
 .mdl-button--fab {
     position: fixed !important;
-    bottom: 35px !important; /* Ajustar para footer más bajo */
+    bottom: 25px !important; /* Posicionar más arriba para que sea visible */
     left: 50% !important;
     transform: translateX(-50%) !important;
     right: auto !important;
-    z-index: 1003 !important;
+    z-index: 1005 !important; /* Z-index más alto para estar por encima de todo */
     /* Asegurar que se mantenga perfectamente circular */
     width: 56px !important;
     height: 56px !important;
@@ -153,7 +155,8 @@
         height: 52px !important;
         min-width: 52px !important;
         min-height: 52px !important;
-        bottom: 30px !important; /* Ajustar para footer más bajo en móviles */
+        bottom: 20px !important; /* Ajustar para footer más bajo en móviles pero mantener visibilidad */
+        z-index: 1005 !important; /* Asegurar z-index alto en móviles también */
     }
     
     .mdl-button--fab .material-icons {
