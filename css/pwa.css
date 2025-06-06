@@ -17,7 +17,7 @@ body {
   -webkit-user-select: none;
   -webkit-text-size-adjust: 100%; /* Importante para Android */
   overscroll-behavior: none; /* Importante para pull-to-refresh */
-  overscroll-behavior-y: none; /* Específico para vertical */
+  /*overscroll-behavior-y: none;*/ /* Específico para vertical */
 }
 
 
