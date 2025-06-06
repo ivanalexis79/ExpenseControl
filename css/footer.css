@@ -37,7 +37,7 @@
     /* Eliminar cualquier padding o margin */
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 48px; /* Altura mínima para los botones */
+    min-height: 24px; /* Altura mínima para los botones */
 }
 
 /* Optimizar botones del footer - eliminar paddings */
@@ -138,14 +138,14 @@
     }
     
     .mdl-mini-footer__left-section {
-        min-height: 44px; /* Reducir altura en móviles */
+        min-height: 24px; /* Reducir altura en móviles */
     }
     
     .mdl-mini-footer__left-section .mdl-button {
         min-width: 44px !important;
-        min-height: 44px !important;
+        min-height: 24px !important;
         width: 44px !important;
-        height: 44px !important;
+        height: 24px !important;
     }
     
     .mdl-mini-footer__left-section .mdl-button .material-icons {
