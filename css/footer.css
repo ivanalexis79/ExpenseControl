@@ -38,8 +38,8 @@
 
 /* Optimizar botones del footer - eliminar paddings */
 .mdl-mini-footer__left-section .mdl-button {
-    min-width: 48px !important;
-    min-height: 48px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
     width: 48px !important;
     height: 48px !important;
     border-radius: 50%;
