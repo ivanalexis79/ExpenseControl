@@ -75,7 +75,7 @@
 /* Corregir el botón FAB - mantener funcionalidad pero reposicionar */
 .mdl-button--fab {
     position: fixed !important;
-    bottom: 25px !important; /* Posicionar para que parte esté sobre el footer */
+    bottom: 35px !important; /* Posicionar para que parte esté sobre el footer */
     left: 50% !important;
     transform: translateX(-50%) !important;
     right: auto !important;
