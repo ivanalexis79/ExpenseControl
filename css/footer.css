@@ -24,7 +24,10 @@
     padding: 0 !important;
     background-color: #ffffff;
     /* Solo el padding superior mínimo necesario para el recorte del círculo */
-    padding-top: 15px !important;
+        /***************************************/
+    padding-top: 8px !important;
+        /***************************************/
+        
     min-height: auto !important;
 }
 
@@ -134,7 +137,7 @@
 @media (max-width: 480px) {
     .mdl-mini-footer {
         padding: 0 !important;
-        padding-top: 24px !important; /* Reducir aún más en móviles ajusta boton en el sacado*/
+        padding-top: 12px !important; /* Reducir aún más en móviles ajusta boton en el sacado reduce el top de la barra inferior*/
     }
     
     .mdl-mini-footer__left-section {
