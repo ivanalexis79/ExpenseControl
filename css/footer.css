@@ -1,7 +1,7 @@
 .fixed-footer {
         /* Ajustar máscara para botón FAB más pequeño en móviles */
-        -webkit-mask: radial-gradient(circle 36px at 50% -11px, transparent 25px, black 26px);
-        mask: radial-gradient(circle 36px at 50% -11px, transparent 25px, black 26px);
+        -webkit-mask: radial-gradient(circle 48px at 50% -11px, transparent 32px, black 26px);
+        mask: radial-gradient(circle 48px at 50% -10px, transparent 32px, black 26px);
     }/* Mantener funcionalidades actuales */
 .mdl-layout__content {
     padding-bottom: 40px !important;
@@ -15,8 +15,8 @@
     z-index: 1000 !important;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     /* Crear el recorte del tercio inferior del círculo con máscara radial */
-    -webkit-mask: radial-gradient(circle 38px at 50% -12px, transparent 27px, black 28px);
-    mask: radial-gradient(circle 38px at 50% -12px, transparent 27px, black 28px);
+    -webkit-mask: radial-gradient(circle 48px at 50% -8px, transparent 32px, black 28px);
+    mask: radial-gradient(circle 36px at 50% -10px, transparent 32px, black 12px);/********** VERSION MOVIL ********/
 }
 
 .mdl-mini-footer {
@@ -25,7 +25,7 @@
     background-color: #ffffff;
     /* Solo el padding superior mínimo necesario para el recorte del círculo */
         /***************************************/
-    padding-top: 8px !important;
+    padding-top: 6px !important;
         /***************************************/
         
     min-height: auto !important;
@@ -38,7 +38,7 @@
     width: 100%;
     position: relative;
     /* Eliminar cualquier padding o margin */
-    padding: 8px !important;
+    padding: 8px !important; /***** PADING CONTENEDOR BOTONES USO ****/
     margin: 0 !important;
     min-height: 24px; /* Altura mínima para los botones */
 }
@@ -137,7 +137,7 @@
 @media (max-width: 480px) {
     .mdl-mini-footer {
         padding: 0 !important;
-        padding-top: 12px !important; /* Reducir aún más en móviles ajusta boton en el sacado reduce el top de la barra inferior*/
+        padding-top: 0px !important; /* Reducir aún más en móviles ajusta boton en el sacado reduce el top de la barra inferior*/
     }
     
     .mdl-mini-footer__left-section {
@@ -145,10 +145,10 @@
     }
     
     .mdl-mini-footer__left-section .mdl-button {
-        min-width: 44px !important;
-        min-height: 24px !important;
-        width: 44px !important;
-        height: 24px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        width: 34px !important;
+        height: 34px !important;
     }
     
     .mdl-mini-footer__left-section .mdl-button .material-icons {
@@ -160,7 +160,7 @@
         height: 52px !important;
         min-width: 52px !important;
         min-height: 52px !important;
-        bottom: 44px !important; /* Ajustar posición en móviles */
+        bottom: 34px !important; /* Ajustar posición en móviles */
         z-index: 1001 !important;
     }
     
