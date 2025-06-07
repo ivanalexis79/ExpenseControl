@@ -225,6 +225,7 @@ function verificarActualizaciones() {
     console.log('[PWA] Verificación manual iniciada');
     
     if (!registration) {
+        mostrarMensajeNoActualizacion();
         console.log('[PWA] No hay registration disponible');
         return;
     }
